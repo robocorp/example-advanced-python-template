@@ -1,2 +1,2 @@
 # This file exists to allow this repo to be function within a GitLab repository
-include: "/ci_cd/robocorp-ci-template.gitlab-ci.yml"
+include: "/ci_cd/gitlab/robocorp-ci-template.gitlab-ci.yml"
