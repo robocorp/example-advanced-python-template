@@ -23,14 +23,14 @@ cache:
     - venv/
 
 before_script:
-  - python --version ; pip --version # For debugging
+  - python --version ; pip --version  # For debugging
   - pip install virtualenv
   - virtualenv venv
   - source venv/bin/activate
 
 test:
   script:
-    - pip install ruff tox # you can also use tox
+    - pip install ruff tox  # you can also use tox
     - pip install --editable ".[test]"
     - tox -e py,ruff
 
