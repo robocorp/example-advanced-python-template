@@ -28,7 +28,8 @@ cache:
     - /home/runner/.robocorp
 
 before_script:
-  - wget -O rcc https://downloads.robocorp.com/rcc/releases/latest/linux64/rcc
+  - apt-get update && apt-get install -y curl
+  - curl -o rcc https://downloads.robocorp.com/rcc/releases/latest/linux64/rcc
   - chmod a+x rcc
   - mv rcc /usr/local/bin/
   - rcc holotree variables robot.yaml
