@@ -1,12 +1,37 @@
+# For more details on the format and content:
+# https://github.com/robocorp/rcc/blob/master/docs/recipes.md#what-is-in-robotyaml
+
 tasks:
   Produce:
-    shell: python producer.py
+    shell: python -m robocorp.tasks run tasks -t "producer"
+
   Consume:
-    shell: python consumer.py
+    shell: python -m robocorp.tasks run tasks -t "consumer"
 
+  # The report task is not include in the tasks/__init__.py file but can still
+  # be called by name via a tasks here.
+  Report:
+    shell: python -m robocorp.tasks run tasks -t "reporter"
+
+  UNIT TESTS:
+    shell: python -m pytest -v tests
+
+devTasks: {}
+
+environmentConfigs:
+  - environment_windows_amd64_freeze.yaml
+  - environment_linux_amd64_freeze.yaml
+  - environment_darwin_amd64_freeze.yaml
+  - conda.yaml
+
+ignoreFiles:
+  - .gitignore
 artifactsDir: output
-condaConfigFile: conda.yaml
-ignoreFiles: [.gitignore]
-
-PATH: [.]
-PYTHONPATH: [.]
+PATH:
+  - .
+  - libs
+  - tasks
+PYTHONPATH:
+  - .
+  - libs
+  - tasks

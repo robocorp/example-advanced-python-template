@@ -1,16 +1,16 @@
-# The pure Python template for producer-consumer model robots using work items
+# Example: Python - Complex Producer Consumer Reporter
 
-This template contains a working robot implementation that has the basic structure where one part produces work items from input and another part that consumes those work items.
+This template leverages the new Python open-source framework [robo](https://github.com/robocorp/robo), and [libraries](https://github.com/robocorp/robo#libraries) from the same project.
 
-Robot has been implementation with Python.
+It provides the structure of a more complext Python project: building automation classes devoted to individual sites or components and combining them together into a task suite. The full suite includes a Control Room-based JSON configuration provided via the Asset Storage solution, as well as a full test suite for unit testing the automation classes (note that unit tests that actually test themselves against the automation target are tagged with "live").
 
-> The [producer-consumer](https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem) model is not limited to two steps, it can continue so that the consumer generates further work items for the next step and so on.
+👉 After running the bot, check out the [*output/log.html*](./output/log.html) file.
 
-The template tries to keep the amount of functional code at a minimum so you have less to clear out and replace with your own implementation, but some functional logic is needed to have the template working and guiding the key parts.
+This example has a significant amount of example code and comments and caution should be taken if you are adapting this directly into an automation for yourself.
 
 > We recommended checking out the article "[Using work items](https://robocorp.com/docs/development-guide/control-room/work-items)" before diving in.
 
-> Also a fully functional example robot can be found at: [Web Store Order Processor Using Work Items](https://robocorp.com/portal/robot/robocorp/example-web-store-work-items)
+# TODO: UPDATE BELOW
 
 ## Tasks
 
@@ -19,17 +19,69 @@ The robot is split into two tasks, meant to run as separate steps in Control Roo
 ### The first task (the producer)
 
 - Load the example Excel file from work item
-- Splits the Excel file into work items for the consumer
+- Split the Excel file into work items for the consumer
 
 ### The second task (the consumer)
 
 > We recommended checking out the article "[Work item exception handling](https://robocorp.com/docs/development-guide/control-room/work-items#work-item-exception-handling)" before diving in.
 
-- A simulated "Login" step.
-  - This simulates random failures to highlight the use of `APPLICATION` -exception type.
-- Loop that handles the work items and just creates a logs row for each
-  - This simulates random failures to highlight the use of `BUSINESS` -exception type.
+- Loop through all work items in the queue and access the payloads from the previous step
 
-### Local testing
+## Local testing
 
-For best experience to test the work items in this example we recommend using [our VS Code extensions](https://robocorp.com/docs/developer-tools/visual-studio-code). With the Robocorp Code extension you can simply run and [select the input work items](https://robocorp.com/docs/developer-tools/visual-studio-code/extension-features#using-work-items) to use, create inputs to simulate error cases and so on.
+For best experience to test the work items in this example we recommend using [our VS Code extensions](https://robocorp.com/docs/developer-tools/visual-studio-code). With the Robocorp Code extension you can simply run and [select the input work items](https://robocorp.com/docs/developer-tools/visual-studio-code/extension-features#using-work-items) to use, create inputs to simulate error cases, and so on.
+
+## Extending the template
+
+> The [producer-consumer](https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem) model is not limited to two steps, it can continue so that the consumer generates further work items for the next step and so on.
+
+Here's how you can add a third step, let's say a **reporter**, which will collect inputs from the previous one (the **consumer**) and generate a simple report with the previously created data. But first, see below what you need to add extra:
+
+### The `reporter` step code
+
+```python
+@task
+def reporter():
+    """Collect and combine all the consumer outputs into a single report."""
+    complete_orders = sum("complete" in item.payload["Order"] for item in workitems.inputs)
+    print(f"Complete orders: {complete_orders}")
+```
+
+And as you can see, we collect some `"Order"` info from the previously created outputs, but we don't have yet such outputs created in the previous step (the **consumer**), so let's create them:
+
+```python
+@task
+def consumer():
+    """Process all the produced input Work Items from the previous step."""
+    for item in workitems.inputs:
+        try:
+            ...
+            workitems.outputs.create(payload={"Order": f"{name} is complete"})
+            item.done()
+        except KeyError as err:
+            ...
+```
+
+The magic happens in this single line added right before the `item.done()` part: `workitems.outputs.create(payload={"Order": f"{name} is complete"})`. This creates a new output for every processed input with an `"Order"` field in the payload data. This is retrieved in the next step (**reporter**) through `item.payload["Order"]`.
+
+### The `reporter` task entry
+
+All good on the code side, but we need now to make this new task visible and runnable right in our [*robot.yaml*](./robot.yaml) configuration. So add this under `tasks:`:
+
+```yaml
+Reporter:
+    shell: python -m robocorp.tasks run tasks.py -t reporter
+```
+
+Now you're good to go, just run the **consumer** again (so you'll have output items created), then run the newly introduced 3rd step called **reporter**.
+
+![reporter log](./devdata/reporter-log.png)
+
+----
+
+🚀 Now, you can just get to writing.
+
+For more information, do not forget to checkout the following:
+* [Robocorp Documentation site](https://robocorp.com/docs)
+* [Portal for more examples](https://robocorp.com/portal)
+* [The robo GitHub repository](https://github.com/robocorp/robo)
