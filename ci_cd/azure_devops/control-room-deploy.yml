@@ -1,0 +1,28 @@
+# This template will deploy to Control Room depending on the
+# workspace parameter passed in.
+
+parameters:
+  - name: workspace
+    type: string
+    default: Dev
+  - name: ROBOT_ID
+    type: string
+
+jobs:
+  - job: Deploy${{ parameters.workspace }}
+    displayName: "Deploy to ${{ parameters.workspace }}"
+    condition: and(eq(variables['Build.SourceBranchName'], '${{ lower(parameters.workspace) }}'), succeeded())
+    pool:
+      vmImage: ubuntu-latest
+    variables:
+      - group: ${{ lower(parameters.workspace) }}-workspace-id
+      - group: control-room-deploy-credentials
+    steps:
+      - checkout: self
+      - script: |
+          curl -o rcc https://downloads.robocorp.com/rcc/releases/latest/linux64/rcc
+          chmod a+x rcc
+          mv rcc /usr/local/bin/
+          echo PUSHING TO CR WORKSPACE: ${{ parameters.workspace }}
+          rcc cloud push -r ${{ parameters.ROBOT_ID }} -w $(WORKSPACE_ID) --account $(CR_ACCESS_CREDENTIALS):$(CR_ENDPOINT_URL)
+        displayName: "Push to ${{ parameters.workspace }} workspace"

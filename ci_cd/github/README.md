@@ -1,0 +1,14 @@
+# GitHub Actions for Python-based Automations
+
+This section of the example explains how to setup a GitHub Actions which will run your unit tests when Pull Requests are opened against the `main`, `test`, and `dev` branches. There is also an action file which can deploy to Control Room if you prefer to use that instead of the [Robocorp Control Room GitHub integration](https://robocorp.com/docs/control-room/technical-architecture-and-security/version-control). This readme describes how you would set up your variables within GitHub to automatically utilize the correct action and workspace within Control Room.
+
+This readme assumes the following:
+
+* A Robocorp Control Room Organization exists with three different workspaces with the following names:
+    * `Production`: which we will link with the `main` branch
+    * `Test`: which we will link with the `test` branch
+    * `Dev`: which we will link with the `dev` branch
+* An Ubuntu-based runner exists within your GitHub instance which can execute the script
+
+## Creating Environments
+

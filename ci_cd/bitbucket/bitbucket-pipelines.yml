@@ -1,0 +1,49 @@
+# Control Room deploy example
+
+# This template allows you to push your robot from your BitBucket repository to your configured
+# Control Room. This configuration will push the robot to the control room every time you push
+# a change to the `main` branch either via merge, push or pull requests.
+
+# Prerequisites:
+# You must configure the following variables:
+# * $CR_ACCESS_CREDENTIALS
+# * $CR_ENDPOINT_URL
+# * $ROBOT_ID
+# * $WORKSPACE_ID
+# The ROBOT_ID and WORKSPACE_ID should be configured at the deployment level so each pipeline deploys
+# to the correct Workspace environment.
+# The robot in control room must be configured as a `robot file` type of robot.
+# For more information on creating/getting these values in control room, check out https://robocorp.com/docs/rcc/workflow
+
+definitions:
+  steps:
+    - step: &deploy
+        name: Deploy to Control Room
+        script:
+          - curl -o rcc https://downloads.robocorp.com/rcc/releases/latest/linux64/rcc
+          - chmod a+x rcc
+          - mv rcc /usr/local/bin/
+          - >
+            rcc cloud push 
+            -r $ROBOT_ID 
+            -w $WORKSPACE_ID 
+            --account $CR_ACCESS_CREDENTIALS:$CR_ENDPOINT_URL
+
+image: atlassian/default-image:latest
+
+pipelines:
+  branches:
+    main:
+      - step:
+          <<: *deploy
+          deployment: Production
+
+    test:
+      - step:
+          <<: *deploy
+          deployment: Staging
+
+    dev:
+      - step:
+          <<: *deploy
+          deployment: Test
