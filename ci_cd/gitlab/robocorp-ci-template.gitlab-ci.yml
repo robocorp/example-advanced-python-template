@@ -21,11 +21,11 @@ variables:
   CR_ENDPOINT_URL: $CR_ENDPOINT_URL
   ROBOT_ID: $ROBOT_ID
   WORKSPACE_ID: $WORKSPACE_ID
-  ROBOCORP_HOME: /home/runner/.robocorp
+  ROBOCORP_HOME: $CI_PROJECT_DIR/.robocorp
 
 cache:
   paths:
-    - /home/runner/.robocorp
+    - .robocorp
 
 before_script:
   - apt-get update && apt-get install -y curl
