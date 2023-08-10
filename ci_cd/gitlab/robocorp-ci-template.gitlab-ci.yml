@@ -14,7 +14,7 @@
 # to the correct Workspace environment.
 # The robot in control room must be configured as a `robot file` type of robot.
 # For more information on creating/getting these values in control room, check out https://robocorp.com/docs/rcc/workflow
-image: ubuntu:latest
+image: mcr.microsoft.com/playwright:v1.36.0
 
 variables:
   CR_ACCESS_CREDENTIALS: $CR_ACCESS_CREDENTIALS
