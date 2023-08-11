@@ -49,30 +49,24 @@ test:
     WORKSPACE_ID: $WORKSPACE_ID
   script:
     - >
-      rcc cloud push --robot-id $ROBOT_ID 
-      --workspace-id $WORKSPACE_ID 
+      rcc cloud push --robot $ROBOT_ID 
+      --workspace $WORKSPACE_ID 
       --account $CR_ACCESS_CREDENTIALS:$CR_ENDPOINT_URL
 
-deploy_production:
+deploy-production:
   extends: .deploy
   environment: production
   only:
     - main
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
 
-deploy_test:
+deploy-test:
   extends: .deploy
   environment: test
   only:
     - test
-  rules:
-    - if: $CI_COMMIT_BRANCH == "test"
 
-deploy_dev:
+deploy-dev:
   extends: .deploy
   environment: dev
   only:
     - dev
-  rules:
-    - if: $CI_COMMIT_BRANCH == "dev"
