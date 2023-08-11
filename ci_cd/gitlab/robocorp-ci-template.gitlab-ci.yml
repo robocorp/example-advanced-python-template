@@ -5,11 +5,14 @@
 # the robot to the Control Room depending on the configured environment.
 
 # Prerequisites:
-# You must configure the following variables within a GitLab environment:
-# * $CR_ACCESS_CREDENTIALS
-# * $CR_ENDPOINT_URL
-# * $ROBOT_ID
-# * $WORKSPACE_ID
+# You must configure the following variables within your GitLab project settings:
+# * $CR_ACCESS_CREDENTIALS: This is the access token for your Control Room account and can be set
+#   per environment or globally within your project.
+# * $CR_ENDPOINT_URL: This is the API endpoint per the Control Room API helper for uploading a robot.
+# * $ROBOT_ID: This is the ID of the robot within the Control Room Robot UI. You should set this for
+#   each environment you have configured.
+# * $WORKSPACE_ID: This is the workspace ID associated with the environment. You should set this for
+#   each environment you have configured.
 # The ROBOT_ID and WORKSPACE_ID should be configured at the deployment level so each pipeline deploys
 # to the correct Workspace environment.
 # The robot in control room must be configured as a `robot file` type of robot.
@@ -17,10 +20,6 @@
 image: mcr.microsoft.com/playwright:v1.36.0
 
 variables:
-  CR_ACCESS_CREDENTIALS: $CR_ACCESS_CREDENTIALS
-  CR_ENDPOINT_URL: $CR_ENDPOINT_URL
-  ROBOT_ID: $ROBOT_ID
-  WORKSPACE_ID: $WORKSPACE_ID
   ROBOCORP_HOME: $CI_PROJECT_DIR/.robocorp
 
 cache:
@@ -35,10 +34,37 @@ before_script:
   - rcc holotree variables robot.yaml
 
 test:
+  stage: test
   script:
     - rcc run -t "UNIT TESTS"
 
-deploy:
+.deploy:
   stage: deploy
-  script: echo "Define your deployment script!"
+  variables:
+    CR_ACCESS_CREDENTIALS: $CR_ACCESS_CREDENTIALS
+    CR_ENDPOINT_URL: $CR_ENDPOINT_URL # This would be the deployment url from the env?
+    ROBOT_ID: $ROBOT_ID
+    WORKSPACE_ID: $WORKSPACE_ID
+  script:
+    - >
+      rcc cloud push --robot-id $ROBOT_ID 
+      --workspace-id $WORKSPACE_ID 
+      --account $CR_ACCESS_CREDENTIALS:$CR_ENDPOINT_URL
+
+deploy_production:
+  extends: .deploy
   environment: production
+  only:
+    - main
+
+deploy_test:
+  extends: .deploy
+  environment: test
+  only:
+    - test
+
+deploy_dev:
+  extends: .deploy
+  environment: dev
+  only:
+    - dev

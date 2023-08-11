@@ -9,6 +9,10 @@ This readme assumes the following:
     * `Test`: which we will link with the `test` branch
     * `Dev`: which we will link with the `dev` branch
 * An Ubuntu-based runner exists within your GitLab instance which can execute the script
+* A GitLab Project and corresponding respository with the following branches, all set to be protected:
+    * `main`
+    * `test`
+    * `dev`
 
 ## Creating Environments
 
