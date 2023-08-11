@@ -37,6 +37,8 @@ test:
   stage: test
   script:
     - rcc run -t "UNIT TESTS"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 .deploy:
   stage: deploy
@@ -56,15 +58,21 @@ deploy_production:
   environment: production
   only:
     - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
 deploy_test:
   extends: .deploy
   environment: test
   only:
     - test
+  rules:
+    - if: $CI_COMMIT_BRANCH == "test"
 
 deploy_dev:
   extends: .deploy
   environment: dev
   only:
     - dev
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
