@@ -48,6 +48,7 @@ test:
     ROBOT_ID: $ROBOT_ID
     WORKSPACE_ID: $WORKSPACE_ID
   script:
+    - echo ".robocorp/" >> .gitignore
     - >
       rcc cloud push --robot $ROBOT_ID 
       --workspace $WORKSPACE_ID 
