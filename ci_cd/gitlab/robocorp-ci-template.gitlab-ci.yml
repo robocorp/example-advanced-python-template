@@ -42,7 +42,7 @@ test:
   stage: deploy
   variables:
     CR_ACCESS_CREDENTIALS: $CR_ACCESS_CREDENTIALS
-    CR_ENDPOINT_URL: $CR_ENDPOINT_URL # This would be the deployment url from the env?
+    CR_ENDPOINT_URL: $CR_ENDPOINT_URL
     ROBOT_ID: $ROBOT_ID
     WORKSPACE_ID: $WORKSPACE_ID
   script:

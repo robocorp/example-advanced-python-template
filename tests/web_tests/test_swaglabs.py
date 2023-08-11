@@ -9,6 +9,7 @@ variables:
  * SECRET_NAME: The name of the secret in the CR vault which contains the
     website credentials.
 """
+import os
 import pytest
 from typing import Generator, Union
 
@@ -32,7 +33,7 @@ def test_browser():
 
 
 @pytest.fixture(scope="module")
-def credentials(module_env_vars: dict) -> Union[vault.SecretContainer, dict]:
+def credentials() -> Union[vault.SecretContainer, dict]:
     """A vault with Swag Labs credentials.
 
     Vault Secrets will only work if test are ran via rcc. If
@@ -42,13 +43,13 @@ def credentials(module_env_vars: dict) -> Union[vault.SecretContainer, dict]:
     be returned and live tests will fail.
     """
     try:
-        return vault.get_secret(module_env_vars.get("SECRET_NAME", "swaglabs"))
+        return vault.get_secret(os.environ.get("SECRET_NAME", "swaglabs"))
     except (KeyError, vault.RobocorpVaultError):
         pass
     try:
         return {
-            "username": module_env_vars["USERNAME"],
-            "password": module_env_vars["PASSWORD"],
+            "username": os.environ["USERNAME"],
+            "password": os.environ["PASSWORD"],
         }
     except KeyError:
         return {
@@ -58,11 +59,11 @@ def credentials(module_env_vars: dict) -> Union[vault.SecretContainer, dict]:
 
 
 @pytest.fixture(scope="module")
-def swag(module_env_vars: dict) -> Generator[Swaglabs, None, None]:
+def swag() -> Generator[Swaglabs, None, None]:
     """An instantiated Swag Labs automation class"""
     swag = Swaglabs()
     swag.configure(
-        base_url=module_env_vars.get("BASE_URL", "https://www.saucedemo.com"),
+        base_url=os.environ.get("BASE_URL", "https://www.saucedemo.com"),
         browser_configuration={"headless": True},
     )
     yield swag

@@ -11,7 +11,7 @@ module_env_vars fixture.
 import pytest
 import logging
 from pathlib import Path
-from dotenv import load_dotenv, dotenv_values
+from dotenv import load_dotenv
 
 ENV_PATH = Path(__file__).parent / ".env"
 """Path to the root .env file."""
@@ -19,48 +19,37 @@ ENV_PATH = Path(__file__).parent / ".env"
 logger = logging.getLogger()
 
 
+# TODO: Consider the case when this is running in CI... should we
+# include the .env file as a variable injected by CI?
+# TODO: Consider that returning a dictionary of loaded keys gives
+# false confidence to tests. If a file does not exist, but someone
+# set it actually as an environment variable, it wouldn't be used.
 @pytest.fixture(scope="session", autouse=True)
-def root_env_vars() -> dict:
-    """Loads the .env file associated with the test session. Additionally,
-    loads the values and returns them as a dictionary. Keys without
-    values will have a `None` value.
-    """
+def root_env_vars() -> None:
+    """Loads the .env file associated with the test session."""
     logger.info(f"Loading environment variables from {ENV_PATH.name}")
     if ENV_PATH.exists():
         load_dotenv(ENV_PATH)
-        return dotenv_values(ENV_PATH)
-    else:
-        return {}
 
 
 @pytest.fixture(scope="package", autouse=True)
-def package_env_vars(request: pytest.FixtureRequest) -> dict:
+def package_env_vars(request: pytest.FixtureRequest) -> None:
     """Loads the .env files associated with the test package. This would
     be the .env in the root of the test folder, if there is one.
-    Additionally, loads the values and returns them as a dictionary.
-    Keys without values will have a `None` value.
     """
     env_path = request.path.parent / ".env"
     if env_path.exists() and not env_path.samefile(ENV_PATH.parent):
         logger.info(f"Loading environment variables from {env_path.name}")
         load_dotenv(env_path)
-        return dotenv_values(env_path)
-    else:
-        return {}
 
 
 @pytest.fixture(scope="module", autouse=True)
-def module_env_vars(request: pytest.FixtureRequest) -> dict:
+def module_env_vars(request: pytest.FixtureRequest) -> None:
     """Loads the .env file associated with the current test module. This
     file must be in the same directory as the test module and have the
-    same name as the test module with a .env extension. Additionally,
-    loads the values and returns them as a dictionary. Keys without
-    values will have a `None` value.
+    same name as the test module with a .env extension.
     """
     env_path = request.path.with_suffix(".env")
     logger.info(f"Loading environment variables from {env_path.name}")
     if env_path.exists():
         load_dotenv(env_path)
-        return dotenv_values(env_path)
-    else:
-        return {}
