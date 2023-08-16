@@ -2,12 +2,14 @@
 for a class that can be used to automate the Swag Labs website. The
 automation class provides for ways to login, manipulate the site, 
 and place orders. It will raise custom errors depending on what happens
-during the automation process.
+during the automation process. These errors all derive from the 
+robocorp.workitems.ApplicationException or robocorp.workitems.BusinessException
+classes, thus when raised inside of a work item Input context manager,
+they will be handled as expected.
 
 It also provides a context manager to ensure that the user is logged
 out when the automation is complete.
 """
-from enum import Enum, EnumMeta
 from typing import Mapping, Optional, Any
 from prodict import Prodict
 
@@ -21,24 +23,39 @@ from playwright.sync_api import (
 
 from robocorp import browser, log
 
-from web import WebAutomationError
+from web import WebApplicationError, WebBusinessError
 
 DEFAULT_URL = "https://www.saucedemo.com/"
 
 
-class SwaglabsWebError(WebAutomationError):
-    """Base class for all Swag Labs web automation errors."""
+### APPLICATION ERRORS ###
+class SwaglabsWebAppError(WebApplicationError):
+    """Base class for all Swag Labs web application errors."""
 
 
-class SwaglabsNotLoggedInError(SwaglabsWebError):
+class SwaglabsNotLoggedInError(SwaglabsWebAppError):
     """Raised when the Swag Labs web site is not logged in."""
 
 
-class SwaglabsAuthenticationError(SwaglabsWebError):
+class SwaglabsAuthenticationError(SwaglabsWebAppError):
     """Raised when the Swag Labs web site authentication fails."""
 
 
-class SwaglabsItemNotFoundError(SwaglabsWebError):
+class SwaglabsCartEmptyError(SwaglabsWebAppError):
+    """Raised when the Swag Labs web site cart is empty during an
+    attempt to submit an order."""
+
+
+class SwaglabsOrderError(SwaglabsWebAppError):
+    """Raised when the Swag Labs web site order fails."""
+
+
+### BUSINESS ERRORS ###
+class SwaglabsWebBusinessError(WebBusinessError):
+    """Base class for all Swag Labs web business errors."""
+
+
+class SwaglabsItemNotFoundError(SwaglabsWebBusinessError):
     """Raised when the Swag Labs web site item is not found."""
 
 
@@ -48,21 +65,7 @@ class Swaglabs:
     out when the automation is complete.
     """
 
-    # Prodict requires you define a static schema so IDE autocompletion works
-    class Locators(Prodict):
-        """The locators used by the automation."""
-
-        username: Locator
-        password: Locator
-        logon_button: Locator
-        menu_button: Locator
-        logout_button: Locator
-        all_items_link: Locator
-        cart_button: Locator
-        cart_page: Locator
-        cart_items_container: Locator
-        inventory_container: Locator
-        inventory_items: Locator
+    # TODO: Make an ABC that this can derive from.
 
     def __init__(
         self,
@@ -145,6 +148,31 @@ class Swaglabs:
             self.configure()
         return self._page
 
+    # Prodict requires you define a static schema so IDE autocompletion works
+    class Locators(Prodict):
+        """The locators used by the automation."""
+
+        username: Locator
+        password: Locator
+        logon_button: Locator
+        menu_button: Locator
+        logout_button: Locator
+        all_items_link: Locator
+        cart_button: Locator
+        cart_page: Locator
+        cart_items: Locator
+        cart_items_container: Locator
+        cart_badge: Locator
+        inventory_container: Locator
+        inventory_items: Locator
+        checkout_button: Locator
+        customer_first_name: Locator
+        customer_last_name: Locator
+        customer_zip_code: Locator
+        customer_continue_button: Locator
+        order_finish_button: Locator
+        order_confirmation: Locator
+
     @property
     def locators(self) -> Locators:
         """The locators used by the automation."""
@@ -156,13 +184,26 @@ class Swaglabs:
             menu_button=self.page.get_by_role("button", name="Open Menu"),
             logout_button=self.page.get_by_role("link", name="Logout"),
             all_items_link=self.page.get_by_role("link", name="All Items"),
-            cart_button=self._page.locator("#shopping_cart_container"),
-            cart_page=self._page.get_by_text("Your Cart", exact=True),
-            cart_items_container=self._page.locator("#cart_contents_container"),
-            inventory_container=self._page.locator(
+            cart_button=self.page.locator("#shopping_cart_container"),
+            cart_page=self.page.get_by_text("Your Cart", exact=True),
+            cart_items=self.page.locator("div.cart_item"),
+            cart_items_container=self.page.locator("#cart_contents_container"),
+            cart_badge=self.page.locator("#shopping_cart_container").locator(
+                "span.shopping_cart_badge"
+            ),
+            inventory_container=self.page.locator(
                 "div#inventory_container.inventory_container"
             ),
-            inventory_items=self._page.locator("div.inventory_item"),
+            inventory_items=self.page.locator("div.inventory_item"),
+            checkout_button=self.page.get_by_role("button", name="Checkout"),
+            customer_first_name=self.page.get_by_placeholder("First Name"),
+            customer_last_name=self.page.get_by_placeholder("Last Name"),
+            customer_zip_code=self.page.get_by_placeholder("Zip/Postal Code"),
+            customer_continue_button=self.page.get_by_role("button", name="Continue"),
+            order_finish_button=self.page.get_by_role("button", name="Finish"),
+            order_confirmation=self.page.get_by_text(
+                "Your order has been dispatched, and will arrive just as fast as the pony can get there!"
+            ),
         )
 
     def configure(
@@ -253,11 +294,15 @@ class Swaglabs:
             self.locators.username.fill(self.username)
             self.locators.password.fill(self.password)
             self.locators.logon_button.click()
-            self.locators.cart_button.wait_for()
+            auth_error = SwaglabsAuthenticationError(
+                "Failed to login to the Swag Labs web site."
+            )
+            try:
+                self.locators.cart_button.wait_for()
+            except TimeoutError:
+                raise auth_error
             if not self.is_logged_in():
-                raise SwaglabsAuthenticationError(
-                    "Failed to login to the Swag Labs web site."
-                )
+                raise auth_error
 
     def logout(self):
         """Logout of the Swag Labs web site.
@@ -290,7 +335,7 @@ class Swaglabs:
 
         Raises:
             SwaglabsNotLoggedInError: Raised if the user is not logged in.
-            TimeoutError: Raised if the cart button is not visible.
+            SwaglabsWebError: Raised if the order screen cannot be reached.
         """
         log.info("Going to the order screen.")
         if not self.is_logged_in():
@@ -302,11 +347,11 @@ class Swaglabs:
         try:
             self.locators.inventory_container.wait_for()
         except TimeoutError:
-            raise SwaglabsWebError(
+            raise SwaglabsWebAppError(
                 "Failed to go to the order screen on the Swag Labs web site."
             )
 
-    def order_item(self, item_name: str) -> None:
+    def add_item_to_cart(self, item_name: str) -> None:
         """Order the specified item.
 
         Args:
@@ -343,19 +388,23 @@ class Swaglabs:
             raise SwaglabsNotLoggedInError(
                 "Cannot go to the cart on the Swag Labs web site when not logged in."
             )
+        if self.locators.cart_page.is_visible():
+            return
         self.locators.cart_button.click()
         try:
             self.locators.cart_page.wait_for()
         except TimeoutError:
-            raise SwaglabsWebError(
+            raise SwaglabsWebAppError(
                 "Failed to go to the cart on the Swag Labs web site."
             )
 
-    def is_item_in_cart(self, item_name: str) -> bool:
+    def is_item_in_cart(self, item_name: str, *, return_to_last: bool = False) -> bool:
         """Determine if the specified item is in the cart.
 
         Args:
             item_name (str): The name of the item to check.
+            return_to_last (bool): If True, the automation will return to the
+                last page it was on before checking the cart.
 
         Returns:
             bool: True if the item is in the cart, False otherwise.
@@ -372,8 +421,75 @@ class Swaglabs:
                 "Cannot determine if items are in the cart on the Swag Labs web site when not logged in."
             )
         self.go_to_cart()
+        return_value = False
         if self.locators.cart_items_container.get_by_role(
             "link", name=item_name
         ).is_visible():
-            return True
-        return False
+            return_value = True
+        if return_to_last:
+            self.page.go_back()
+        return return_value
+
+    def is_cart_empty(self) -> bool:
+        """Checks if the cart is empty by looking at the badge count
+        superimpsoed on the cart button. Note, this method skips
+        actionability and visibility checks.
+        """
+        log.info("Checking if the cart is empty.")
+        if not self.is_logged_in():
+            raise SwaglabsNotLoggedInError(
+                "Cannot determine if the cart is empty on the Swag Labs web site when not logged in."
+            )
+        return not self.locators.cart_badge.is_visible()
+
+    def clear_cart(self) -> None:
+        """Empties the cart, essentially cancelling the order."""
+        log.info("Clearing the cart.")
+        if not self.is_logged_in():
+            raise SwaglabsNotLoggedInError(
+                "Cannot clear the cart on the Swag Labs web site when not logged in."
+            )
+        if not self.is_cart_empty():
+            self.go_to_cart()
+            for item in self.locators.cart_items.all():
+                item_remove_button = item.get_by_role("button", name="Remove")
+                item_remove_button.click()
+                item_remove_button.wait_for(state="hidden", timeout=10000.0)
+        else:
+            log.warn("The cart is already empty.")
+
+    def submit_order(self, first_name: str, last_name: str, zip_code: str) -> None:
+        """Submits the current order from the cart. You must provide
+        customer information for the order.
+
+        Args:
+            first_name (str): The first name of the customer.
+            last_name (str): The last name of the customer.
+            zip_code (str): The zip code of the customer.
+
+        Raises:
+            SwaglabsNotLoggedInError: Raised if the user is not logged in.
+            SwaglabsCartEmptyError: Raised if the cart is empty.
+        """
+        log.info("Submitting the order.")
+        if not self.is_logged_in():
+            raise SwaglabsNotLoggedInError(
+                "Cannot submit the order on the Swag Labs web site when not logged in."
+            )
+        if self.is_cart_empty():
+            raise SwaglabsCartEmptyError(
+                "Cannot submit the order on the Swag Labs web site when the cart is empty."
+            )
+        self.go_to_cart()
+        self.locators.checkout_button.click()
+        self.locators.customer_first_name.fill(first_name)
+        self.locators.customer_last_name.fill(last_name)
+        self.locators.customer_zip_code.fill(zip_code)
+        self.locators.customer_continue_button.click()
+        self.locators.order_finish_button.click()
+        try:
+            self.locators.order_confirmation.wait_for()
+        except TimeoutError:
+            raise SwaglabsOrderError(
+                "Failed to submit the order on the Swag Labs web site."
+            )

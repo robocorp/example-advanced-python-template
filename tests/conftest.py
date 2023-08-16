@@ -19,11 +19,6 @@ ENV_PATH = Path(__file__).parent / ".env"
 logger = logging.getLogger()
 
 
-# TODO: Consider the case when this is running in CI... should we
-# include the .env file as a variable injected by CI?
-# TODO: Consider that returning a dictionary of loaded keys gives
-# false confidence to tests. If a file does not exist, but someone
-# set it actually as an environment variable, it wouldn't be used.
 @pytest.fixture(scope="session", autouse=True)
 def root_env_vars() -> None:
     """Loads the .env file associated with the test session."""

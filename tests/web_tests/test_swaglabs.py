@@ -23,15 +23,6 @@ from web.swaglabs import (
 )
 
 
-# debuging test to be deleted
-def test_browser():
-    browser1 = browser.browser()
-    swag = Swaglabs()
-    swag.configure()
-    browser2 = swag._browser
-    assert browser1 is browser2
-
-
 @pytest.fixture(scope="module")
 def credentials() -> Union[vault.SecretContainer, dict]:
     """A vault with Swag Labs credentials.
@@ -48,8 +39,8 @@ def credentials() -> Union[vault.SecretContainer, dict]:
         pass
     try:
         return {
-            "username": os.environ["USERNAME"],
-            "password": os.environ["PASSWORD"],
+            "username": os.environ["AUTOMATION_USERNAME"],
+            "password": os.environ["AUTOMATION_PASSWORD"],
         }
     except KeyError:
         return {
@@ -76,12 +67,22 @@ def test_swaglabs_login_error(swag: Swaglabs) -> None:
         swag.login()
 
 
+@pytest.mark.live
+def test_swaglabs_locked_out_user(swag: Swaglabs) -> None:
+    """Tests that the locked out user throws an error"""
+    with pytest.raises(SwaglabsAuthenticationError):
+        swag.login(username="locked_out_user", password="secret_sauce")
+
+
 @pytest.fixture(scope="module")
 def swag_logged_in(
     swag: Swaglabs, credentials: vault.SecretContainer
 ) -> Generator[Swaglabs, None, None]:
     """Tests that a user can login to Swag Labs"""
     swag.login(username=credentials["username"], password=credentials["password"])
+    swag.locators.menu_button.click()
+    swag.page.get_by_role("link", name="Reset App State").click()
+    swag.page.get_by_role("button", name="Close Menu").click()
     yield swag
 
 
@@ -103,13 +104,26 @@ def test_swaglabs_login(
         ("Bread Basket Backpack", False),
     ],
 )
-def test_swaglabs_order(
+def test_ordering_an_item(
     swag_logged_in: Swaglabs, item_name: str, expected_to_be_found: bool
 ) -> None:
     """Tests that a user can order an item"""
     if expected_to_be_found:
-        swag_logged_in.order_item(item_name)
+        swag_logged_in.add_item_to_cart(item_name)
     else:
         with pytest.raises(SwaglabsItemNotFoundError):
-            swag_logged_in.order_item(item_name)
-    assert swag_logged_in.is_item_in_cart(item_name) == expected_to_be_found
+            swag_logged_in.add_item_to_cart(item_name)
+    assert (
+        swag_logged_in.is_item_in_cart(item_name, return_to_last=True)
+        == expected_to_be_found
+    )
+    if not swag_logged_in.is_cart_empty():
+        swag_logged_in.clear_cart()
+        assert swag_logged_in.is_cart_empty()
+
+
+@pytest.mark.live
+def test_submit_order(swag_logged_in: Swaglabs) -> None:
+    """Tests that a user can submit an order"""
+    swag_logged_in.add_item_to_cart("Sauce Labs Backpack")
+    swag_logged_in.submit_order("Test", "User", "12345")

@@ -6,8 +6,12 @@ Note: In many Python use cases, all errors are collected in one module,
 but in this repo, only general errors are included in the errors modules
 and specific errors are defined within each automation module.
 """
-from errors import AutomationError
+from errors import ApplicationError, BusinessError
 
 
-class WebAutomationError(AutomationError):
+class WebApplicationError(ApplicationError):
     """Base class for all web automation errors."""
+
+
+class WebBusinessError(BusinessError):
+    """Base class for all web automation business errors."""
