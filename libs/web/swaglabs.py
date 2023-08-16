@@ -23,7 +23,7 @@ from playwright.sync_api import (
 
 from robocorp import browser, log
 
-from web import WebApplicationError, WebBusinessError
+from web import WebAutomationBase, WebApplicationError, WebBusinessError
 
 DEFAULT_URL = "https://www.saucedemo.com/"
 
@@ -59,13 +59,11 @@ class SwaglabsItemNotFoundError(SwaglabsWebBusinessError):
     """Raised when the Swag Labs web site item is not found."""
 
 
-class Swaglabs:
+class Swaglabs(WebAutomationBase):
     """This class provides for the automation of the Swag Labs web site.
     It provides for a context manager to ensure that the user is logged
     out when the automation is complete.
     """
-
-    # TODO: Make an ABC that this can derive from.
 
     def __init__(
         self,
@@ -76,28 +74,8 @@ class Swaglabs:
         browser_configuration: Optional[Mapping[str, Any]] = None,
         context_configuration: Optional[Mapping[str, Any]] = None,
     ):
-        """Initialize the Swag Labs automation class.
-
-        Note: for the available browser and context configuration options
-        see the documentation for the robocorp.browser module and the
-        Playwright package.
-
-        Args:
-            username (str): The username to use to login.
-            password (str): The password to use to login.
-            base_url (str): The URL of the Swag Labs web site. If not provided
-                it will default to the live site (https://www.saucedemo.com/)
-            timeout (int): The timeout to use for the automation.
-            browser_configuration (Mapping): The browser configuration to use.
-            context_configuration (Mapping): The context configuration to use.
-        """
-        self.base_url = DEFAULT_URL
-        self.username = None
-        self.password = None
-        self._browser_config = {}
-        if base_url is not None:
-            self.base_url = base_url
-        self.configure(
+        self.base_url = base_url
+        super().__init__(
             username,
             password,
             base_url,
@@ -106,47 +84,23 @@ class Swaglabs:
             context_configuration,
         )
 
-    def __enter__(self) -> "Swaglabs":
-        """Enter the context manager. This will create a browser instance
-        and navigate to the Swag Labs web site.
-        """
-        self.configure()
-        self.login()
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        """Exit the context manager. This will close the browser instance."""
-        self.close()
-
-    @property
-    def browser(self) -> PlaywrightBrowser:
-        """The browser instance. Calling this before configuring
-        the automation will cause the automation to be configured
-        with the default configuration.
-        """
-        if self._browser is None:
-            self.configure()
-        return self._browser
-
-    @property
-    def context(self) -> BrowserContext:
-        """The browser context. Calling this before configuring
-        the automation will cause the automation to be configured
-        with the default configuration.
-        """
-        if self._context is None:
-            self.configure()
-        return self._context
-
-    @property
-    def page(self) -> Page:
-        """The browser page. Calling this before configuring
-        the automation will cause the automation to be configured
-        with the default configuration.
-        """
-        if self._page is None:
-            self.configure()
-        return self._page
+    def configure(
+        self,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        base_url: Optional[str] = None,
+        timeout: float = 10000.0,
+        browser_configuration: Optional[Mapping[str, Any]] = None,
+        context_configuration: Optional[Mapping[str, Any]] = None,
+    ) -> None:
+        super().configure(
+            username,
+            password,
+            base_url,
+            timeout,
+            browser_configuration,
+            context_configuration,
+        )
 
     # Prodict requires you define a static schema so IDE autocompletion works
     class Locators(Prodict):
@@ -205,55 +159,6 @@ class Swaglabs:
                 "Your order has been dispatched, and will arrive just as fast as the pony can get there!"
             ),
         )
-
-    def configure(
-        self,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        base_url: Optional[str] = None,
-        timeout: float = 10000.0,
-        browser_configuration: Optional[Mapping[str, Any]] = None,
-        context_configuration: Optional[Mapping[str, Any]] = None,
-    ) -> None:
-        """Configure the Swag Labs automation class. If robocorp.browser
-        was already configured before using this method, the new
-        browser and context configuration will be ignored.
-
-        Note: this does not open the page to the base url. To do that
-        use the open or login methods.
-
-        Args:
-            username (str): The username to use to login.
-            password (str): The password to use to login.
-            base_url (str): The base URL of the Swag Labs web site.
-            timeout (float): The timeout to use when waiting for elements.
-            browser_configuration (mapping): The keyword arguments to use to configure the browser.
-            context_configuration (mapping): The keyword arguments to use to configure the context.
-        """
-        if isinstance(username, str):
-            self.username = username
-        elif username is not None:
-            raise TypeError(f"username must be a string, not {type(username).__name__}")
-        if isinstance(password, str):
-            self.password = password
-        elif password is not None:
-            raise TypeError(f"password must be a string, not {type(password).__name__}")
-        if isinstance(base_url, str):
-            self.base_url = base_url
-        elif base_url is not None:
-            raise TypeError(f"url must be a string, not {type(base_url).__name__}")
-        if browser_configuration is not None:
-            browser.configure(**browser_configuration)
-        if context_configuration is not None:
-            browser.configure_context(**context_configuration)
-        self._browser = browser.browser()
-        self._context = browser.context()
-        self._context.set_default_timeout(timeout)
-        self._page = browser.page()
-
-    def open(self) -> None:
-        """Open the Swag Labs web site."""
-        self.page.goto(self.base_url)
 
     def is_logged_in(self) -> bool:
         """Determine if the user is logged in. Note that none of the calls
@@ -317,18 +222,6 @@ class Swaglabs:
             )
         self.locators.menu_button.click()
         self.locators.logout_button.click()
-
-    def close(self):
-        """Logs out and then closes the browser."""
-        log.info("Closing the Swag Labs web site.")
-        if self.is_logged_in():
-            self.logout()
-        # Note: browser and context are not closed based on the
-        # assumption that the browser is shared with other automation
-        # classes, see the robocorp.browser module for additional
-        # information.
-        if self._page is not None:
-            self._page.close()
 
     def go_to_order_screen(self) -> None:
         """Go to the order screen.
