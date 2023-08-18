@@ -1,8 +1,13 @@
 # Example: Python - Complex Producer Consumer Reporter
 
-This template leverages the new Python open-source framework [robo](https://github.com/robocorp/robo), and [libraries](https://github.com/robocorp/robo#libraries) from the same project.
+This template leverages the new Python open-source framework [Robo](https://github.com/robocorp/robo), and [libraries](https://github.com/robocorp/robo#libraries) from the same project.
 
-It provides the structure of a more complext Python project: building automation classes devoted to individual sites or components and combining them together into a task suite. The full suite includes a Control Room-based JSON configuration provided via the Asset Storage solution, as well as a full test suite for unit testing the automation classes (note that unit tests that actually test themselves against the automation target are tagged with "live").
+It provides the structure of a more complex Python project: building automation classes devoted to individual sites or components and combining them together into a task suite. The full suite includes the following features:
+
+* Control Room-based JSON configuration provided via the Asset Storage solution
+* A Pytest-based test suite targeting the automation classes, runnable via VSCode test extention, Robocorp Code extension, or `rcc` command in CI/CD.
+* A `WebAutomationBase` class which can be extended, allowing for common functionalities between different automations.
+* An internal Playwright locator dictionary with IDE support via the `prodict` package.
 
 👉 After running the bot, check out the [*output/log.html*](./output/log.html) file.
 

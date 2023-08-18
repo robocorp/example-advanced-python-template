@@ -2,11 +2,12 @@
 # https://github.com/robocorp/rcc/blob/master/docs/recipes.md#what-is-in-robotyaml
 
 tasks:
+  # TODO: Make these work
   Produce:
-    shell: python -m robocorp.tasks run tasks -t "producer"
+    shell: python -m robocorp.tasks run ./tasks -t "producer"
 
   Consume:
-    shell: python -m robocorp.tasks run tasks -t "consumer"
+    shell: python -m robocorp.tasks run ./tasks -t "consumer"
 
   # The report task is not include in the tasks/__init__.py file but can still
   # be called by name via a tasks here.

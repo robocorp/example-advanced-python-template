@@ -17,6 +17,8 @@ from web.swaglabs import Swaglabs
 
 ARTIFACTS_DIR = os.getenv("ROBOT_ARTIFACTS", "output")
 
+# TODO: Make the tasks work like in the original example
+
 
 ### SHARED FUNCTIONS ###
 def _setup_log_from_environ() -> None:

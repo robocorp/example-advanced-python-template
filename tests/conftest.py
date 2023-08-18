@@ -8,6 +8,7 @@ the test file is named test_foo.py, then the .env file should be named
 test_foo.env. The .env file is loaded automatically by the
 module_env_vars fixture.
 """
+# TODO: Use the plugin at https://github.com/robocorp/robo/tree/master/log_pytest
 import pytest
 import logging
 from pathlib import Path
