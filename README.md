@@ -15,6 +15,7 @@ This example has a significant amount of example code and comments and caution s
 
 > We recommended checking out the article "[Using work items](https://robocorp.com/docs/development-guide/control-room/work-items)" before diving in.
 
+TODO: Add references to https://robocorp.com/docs/python/framework-intro
 # TODO: UPDATE BELOW
 
 ## Tasks
