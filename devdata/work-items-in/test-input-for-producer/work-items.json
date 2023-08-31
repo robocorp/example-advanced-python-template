@@ -7,7 +7,7 @@
             "Item": "Sauce Labs Onesee"
         },
         "files": {
-            "orders.xlsx": "orders.xlsx"
+            "orders.csv": "orders.csv"
         }
     }
 ]

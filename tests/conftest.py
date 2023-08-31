@@ -8,22 +8,21 @@ the test file is named test_foo.py, then the .env file should be named
 test_foo.env. The .env file is loaded automatically by the
 module_env_vars fixture.
 """
-# TODO: Use the plugin at https://github.com/robocorp/robo/tree/master/log_pytest
 import pytest
-import logging
+
+# Integration with robocorp-log provided by robocorp-log-pytest
+from robocorp import log
 from pathlib import Path
 from dotenv import load_dotenv
 
 ENV_PATH = Path(__file__).parent / ".env"
 """Path to the root .env file."""
 
-logger = logging.getLogger()
-
 
 @pytest.fixture(scope="session", autouse=True)
 def root_env_vars() -> None:
     """Loads the .env file associated with the test session."""
-    logger.info(f"Loading environment variables from {ENV_PATH.name}")
+    log.info(f"Loading environment variables from {ENV_PATH.name}")
     if ENV_PATH.exists():
         load_dotenv(ENV_PATH)
 
@@ -35,7 +34,7 @@ def package_env_vars(request: pytest.FixtureRequest) -> None:
     """
     env_path = request.path.parent / ".env"
     if env_path.exists() and not env_path.samefile(ENV_PATH.parent):
-        logger.info(f"Loading environment variables from {env_path.name}")
+        log.info(f"Loading environment variables from {env_path.name}")
         load_dotenv(env_path)
 
 
@@ -46,6 +45,6 @@ def module_env_vars(request: pytest.FixtureRequest) -> None:
     same name as the test module with a .env extension.
     """
     env_path = request.path.with_suffix(".env")
-    logger.info(f"Loading environment variables from {env_path.name}")
+    log.info(f"Loading environment variables from {env_path.name}")
     if env_path.exists():
         load_dotenv(env_path)

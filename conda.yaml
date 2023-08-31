@@ -14,8 +14,8 @@ dependencies:
 
   - pip=22.1.2 # https://pip.pypa.io/en/stable/news
   - pip:
-      - robocorp==0.9.0 # https://pypi.org/project/robocorp
+      - robocorp==0.10.1 # https://pypi.org/project/robocorp
       - robocorp-browser==2.1.0 # https://pypi.org/project/robocorp-browser
+      - robocorp-log-pytest==0.0.1 # https://pypi.org/project/robocorp-log-pytest
+      - robocorp-excel==0.4.0 # https://pypi.org/project/robocorp-excel
       - prodict==0.8.18 # https://pypi.org/project/prodict
-      # Imported only for RPA.Excel.Files, which may be ported to `robocorp` in the future.
-      - rpaframework==25.0.1 # https://pypi.org/project/rpaframework

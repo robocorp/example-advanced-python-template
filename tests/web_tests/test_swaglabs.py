@@ -126,4 +126,5 @@ def test_ordering_an_item(
 def test_submit_order(swag_logged_in: Swaglabs) -> None:
     """Tests that a user can submit an order"""
     swag_logged_in.add_item_to_cart("Sauce Labs Backpack")
-    swag_logged_in.submit_order("Test", "User", "12345")
+    order_number = swag_logged_in.submit_order("Test", "User", "12345")
+    assert order_number is not None

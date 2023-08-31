@@ -10,6 +10,9 @@ they will be handled as expected.
 It also provides a context manager to ensure that the user is logged
 out when the automation is complete.
 """
+import random
+import string
+
 from typing import Mapping, Optional, Any
 from prodict import Prodict
 
@@ -69,7 +72,7 @@ class Swaglabs(WebAutomationBase):
         self,
         username: Optional[str] = None,
         password: Optional[str] = None,
-        base_url: str = DEFAULT_URL,
+        base_url: str = DEFAULT_URL,  # Note the new default value
         timeout: float = 10000.0,
         browser_configuration: Optional[Mapping[str, Any]] = None,
         context_configuration: Optional[Mapping[str, Any]] = None,
@@ -110,6 +113,7 @@ class Swaglabs(WebAutomationBase):
         password: Locator
         logon_button: Locator
         menu_button: Locator
+        close_menu_button: Locator
         logout_button: Locator
         all_items_link: Locator
         cart_button: Locator
@@ -136,6 +140,7 @@ class Swaglabs(WebAutomationBase):
             password=self.page.get_by_placeholder("Password"),
             logon_button=self.page.get_by_role("button", name="Login"),
             menu_button=self.page.get_by_role("button", name="Open Menu"),
+            close_menu_button=self.page.get_by_role("button", name="Close Menu"),
             logout_button=self.page.get_by_role("link", name="Logout"),
             all_items_link=self.page.get_by_role("link", name="All Items"),
             cart_button=self.page.locator("#shopping_cart_container"),
@@ -204,8 +209,8 @@ class Swaglabs(WebAutomationBase):
             )
             try:
                 self.locators.cart_button.wait_for()
-            except TimeoutError:
-                raise auth_error
+            except TimeoutError as e:
+                raise auth_error from e
             if not self.is_logged_in():
                 raise auth_error
 
@@ -239,10 +244,12 @@ class Swaglabs(WebAutomationBase):
         self.locators.all_items_link.click()
         try:
             self.locators.inventory_container.wait_for()
-        except TimeoutError:
+        except TimeoutError as e:
             raise SwaglabsWebAppError(
                 "Failed to go to the order screen on the Swag Labs web site."
-            )
+            ) from e
+        if self.locators.close_menu_button.is_visible():
+            self.locators.close_menu_button.click()
 
     def add_item_to_cart(self, item_name: str) -> None:
         """Order the specified item.
@@ -252,6 +259,7 @@ class Swaglabs(WebAutomationBase):
 
         Raises:
             SwaglabsNotLoggedInError: Raised if the user is not logged in.
+            SwaglabsItemNotFoundError: Raised if the item is not found.
         """
         log.info(f"Ordering the {item_name} item.")
         if not self.is_logged_in():
@@ -264,10 +272,10 @@ class Swaglabs(WebAutomationBase):
             self.locators.inventory_items.filter(has_text=item_name).get_by_role(
                 "button", name="Add to cart"
             ).click()
-        except TimeoutError:
+        except TimeoutError as e:
             raise SwaglabsItemNotFoundError(
                 f"The {item_name} item was not found on the Swag Labs web site."
-            )
+            ) from e
 
     def go_to_cart(self) -> None:
         """Go to the cart.
@@ -286,10 +294,10 @@ class Swaglabs(WebAutomationBase):
         self.locators.cart_button.click()
         try:
             self.locators.cart_page.wait_for()
-        except TimeoutError:
+        except TimeoutError as e:
             raise SwaglabsWebAppError(
                 "Failed to go to the cart on the Swag Labs web site."
-            )
+            ) from e
 
     def is_item_in_cart(self, item_name: str, *, return_to_last: bool = False) -> bool:
         """Determine if the specified item is in the cart.
@@ -349,9 +357,9 @@ class Swaglabs(WebAutomationBase):
                 item_remove_button.click()
                 item_remove_button.wait_for(state="hidden", timeout=10000.0)
         else:
-            log.warn("The cart is already empty.")
+            log.info("The cart is already empty.")
 
-    def submit_order(self, first_name: str, last_name: str, zip_code: str) -> None:
+    def submit_order(self, first_name: str, last_name: str, zip_code: str) -> str:
         """Submits the current order from the cart. You must provide
         customer information for the order.
 
@@ -360,9 +368,13 @@ class Swaglabs(WebAutomationBase):
             last_name (str): The last name of the customer.
             zip_code (str): The zip code of the customer.
 
+        Returns:
+            str: The order number of the submitted order.
+
         Raises:
             SwaglabsNotLoggedInError: Raised if the user is not logged in.
             SwaglabsCartEmptyError: Raised if the cart is empty.
+            SwaglabsOrderError: Raised if the order fails.
         """
         log.info("Submitting the order.")
         if not self.is_logged_in():
@@ -382,7 +394,46 @@ class Swaglabs(WebAutomationBase):
         self.locators.order_finish_button.click()
         try:
             self.locators.order_confirmation.wait_for()
-        except TimeoutError:
+        except TimeoutError as e:
             raise SwaglabsOrderError(
                 "Failed to submit the order on the Swag Labs web site."
+            ) from e
+        order_number = self.get_order_number()
+        if order_number is None:
+            raise SwaglabsOrderError(
+                "Swag Labs web site did not provide an order number."
             )
+        return order_number
+
+    def get_order_number(self) -> Optional[str]:
+        """Gets the order number from the confirmation page. Note, this
+        method skips actionability and visibility checks and returns
+        None if the page is not a confirmation page.
+        """
+        log.info("Getting the order number.")
+        if not self.is_logged_in():
+            raise SwaglabsNotLoggedInError(
+                "Cannot get the order number on the Swag Labs web site when not logged in."
+            )
+        if not self.locators.order_confirmation.is_visible():
+            return None
+        return self.generate_mock_order_number()
+
+    def generate_mock_order_number(self, order_number_length: int = 10) -> str:
+        """Generates a mock order number. The sauce labs site does not
+        actually generate order numbers, so this is mocked to provide
+        an example of generating reports from completed work items.
+        """
+        first_part = "".join(
+            random.choices(
+                string.digits,
+                k=3 if order_number_length > 3 else order_number_length,
+            )
+        )
+        second_part = "".join(
+            random.choices(
+                string.digits,
+                k=order_number_length - len(first_part),
+            )
+        )
+        return f"ON-{first_part}-{second_part}"
