@@ -16,7 +16,7 @@ from typing import Generator, Union
 from robocorp import browser, vault
 
 # System under test
-from web.swaglabs import (
+from libs.web.swaglabs import (
     Swaglabs,
     SwaglabsAuthenticationError,
     SwaglabsItemNotFoundError,

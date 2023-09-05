@@ -26,7 +26,7 @@ from playwright.sync_api import (
 
 from robocorp import browser, log
 
-from web import WebAutomationBase, WebApplicationError, WebBusinessError
+from . import WebAutomationBase, WebApplicationError, WebBusinessError
 
 DEFAULT_URL = "https://www.saucedemo.com/"
 

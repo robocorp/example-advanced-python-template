@@ -29,9 +29,5 @@ ignoreFiles:
 artifactsDir: output
 PATH:
   - .
-  - libs
-  - tasks
 PYTHONPATH:
   - .
-  - libs
-  - tasks

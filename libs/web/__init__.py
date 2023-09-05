@@ -21,7 +21,7 @@ from playwright.sync_api import (
 
 from robocorp import browser, log
 
-from errors import ApplicationError, BusinessError
+from ..errors import ApplicationError, BusinessError
 
 
 class WebApplicationError(ApplicationError):
