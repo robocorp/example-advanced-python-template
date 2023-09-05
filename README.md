@@ -52,7 +52,7 @@ The consumer is located within the `tasks.main_tasks` module.
 
 ### The third taks (the reporter)
 
-The reporter is located within the `tasks.report` module.
+The reporter is located within the `tasks.reporter` module.
 
 The reporter step should be configured in the Control Room with the setting `Start Only After all work items from previous steps are either done or failed` because reporters generally are tasked with collating all work item results from previous steps.
 
@@ -66,6 +66,8 @@ Final output work items can be used several ways within the Control Room, but pr
 For best experience to test the work items in this example we recommend using [our VS Code extensions](https://robocorp.com/docs/developer-tools/visual-studio-code). With the Robocorp Code extension you can simply run and [select the input work items](https://robocorp.com/docs/developer-tools/visual-studio-code/extension-features#using-work-items) to use, create inputs to simulate error cases, and so on.
 
 Additionally, the Automation Classes are optimized to be tested via Pytest using the VS Code test extension, you can read more about how that works [here](https://code.visualstudio.com/docs/python/testing).
+
+TODO: Perhaps discuss the pytest.ini and related setup here?
 
 ## CI/CD Pipelines
 

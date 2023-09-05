@@ -14,6 +14,34 @@ This readme assumes the following:
     * `test`
     * `dev`
 
-## Creating Environments
+## Creating environments
 
-TODO: Finish readme
+Before you can configure pipelines to use different variables for each branch, you must first create corresponding environments. You do this within your GitLab repository by navigating to the `Operate` > `Environments` menu, then clicking the `add` button. 
+
+![Creating environments in GitLab](./img/gitlab_create_environments_1.png)
+
+You must specificy a name before saving. In our example, we chose `dev`, `test`, and `production`.
+
+![Creating a new environment in GitLab](./img/gitlab_create_environments_2.png)
+
+## Saving API keys and other variables
+
+Once you have your three environments, you can create variables for each as well as provide variables for the secret API token needed by the pipeline if you are deploying from it.
+
+> **IMPORTANT** Be sure to make the API token a `masked` variable!
+
+Variables can be created from the `Settings` > `CI/CD` menu. Search through the various sections of the `CI/CD Settings` menu to find the `Variables` section, where you can add the variables.
+
+![Finding the variables settings](./img/gitlab_variables_settings.png)
+
+You must add the variables as defined in the [pipeline](robocorp-ci-template.gitlab-ci.yml) file.
+
+![Adding a variable](./img/gitlab_add_variable_dialog.png)
+
+Since you are creating different variables for each environment, you must create the same variable multiple times, setting it to be related to specific environments.
+
+![Adding extra variables](./img/gitlab_add_diff_env_variable.png)
+
+## Try running it!
+
+Now you can try to run your new pipeline from the `Build` > `Pipeline` menu! You can also trigger the pipeline by creating a merge request targeting any of the three protected branches.
