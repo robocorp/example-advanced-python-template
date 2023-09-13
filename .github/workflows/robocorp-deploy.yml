@@ -23,7 +23,7 @@ jobs:
         with:
           path: |
             ~/.robocorp
-            /user/local/bin/rcc
+            /usr/local/bin/rcc
           key: ${{ runner.os }}-dependencies-${{ hashFiles('**/robot.yaml', '**/conda.yaml') }}
 
       - name: Deploy to Robocorp Control Room
