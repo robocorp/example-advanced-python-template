@@ -17,7 +17,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            .robocorp/
+            ${{ github.workspace }}/.robocorp
             /user/local/bin/rcc
           key: ${{ runner.os }}-dependencies-${{ hashFiles('**/robot.yaml, **/conda.yaml') }}
           restore-keys: |
