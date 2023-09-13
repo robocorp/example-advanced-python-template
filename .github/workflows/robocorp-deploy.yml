@@ -7,10 +7,6 @@ on:
         description: 'Environment'
         type: string
         required: true
-    secrets:
-      CR_ACCESS_CREDENTIALS:
-        description: 'Robocorp Control Room access credentials'
-        required: true
 
 jobs:
   call-robocorp-install-dependencies:
