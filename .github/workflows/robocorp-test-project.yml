@@ -12,6 +12,7 @@ jobs:
   call-install-dependencies:
     uses: ./.github/workflows/robocorp-install-dependencies.yml
   test:
+    needs: call-install-dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Run tests
