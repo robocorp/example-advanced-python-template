@@ -1,8 +1,9 @@
 # Python Automation testing and deploy example
 
 # This template allows you to push your robot from your GitLab repository to your configured
-# Control Room. This configuration will run an automation's unit tests via `rcc` and deploy
-# the robot to the Control Room depending on the configured environment.
+# Control Room. This configuration will run an automation's unit tests via `rcc` as part of
+# any pull request and deploy the project upon merge/commit to the Control Room depending
+# on the configured environment.
 
 # Prerequisites:
 # You must configure the following variables within your GitLab project settings:
@@ -15,6 +16,7 @@
 #   each environment you have configured.
 # The ROBOT_ID and WORKSPACE_ID should be configured at the deployment level so each pipeline deploys
 # to the correct Workspace environment.
+#
 # The robot in control room must be configured as a `robot file` type of robot.
 # For more information on creating/getting these values in control room, check out https://robocorp.com/docs/rcc/workflow
 image: mcr.microsoft.com/playwright:v1.36.0
@@ -48,7 +50,6 @@ test:
     ROBOT_ID: $ROBOT_ID
     WORKSPACE_ID: $WORKSPACE_ID
   script:
-    - echo ".robocorp/" >> .gitignore
     - >
       rcc cloud push --robot $ROBOT_ID 
       --workspace $WORKSPACE_ID 

@@ -1,0 +1,36 @@
+name: Install Dependencies
+
+on:
+  workflow_call:
+
+env:
+  ROBOCORP_HOME: ${{ github.workspace }}/.robocorp
+    
+jobs:
+  install_dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache Dependencies
+        id: cache-dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            .robocorp/
+            /user/local/bin/rcc
+          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/robot.yaml, **/conda.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-dependencies-
+
+      - name: Install Robocorp CLI
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: |
+          curl -o rcc https://downloads.robocorp.com/rcc/releases/latest/linux64/rcc
+          chmod a+x rcc
+          mv rcc /usr/local/bin/
+      - name: Install dependencies
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: |
+          rcc holotree variables robot.yaml
+

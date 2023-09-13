@@ -1,0 +1,13 @@
+name: Deploy to Production Robocorp Control Room
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  call-robocorp-deploy:
+    uses: ./robocorp-deploy.yml
+    with:
+      environment: production 
+

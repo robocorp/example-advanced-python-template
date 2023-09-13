@@ -2,6 +2,8 @@
 
 This section of the example explains how to setup a GitHub Actions which will run your unit tests when Pull Requests are opened against the `main`, `test`, and `dev` branches. There is also an action file which can deploy to Control Room if you prefer to use that instead of the [Robocorp Control Room GitHub integration](https://robocorp.com/docs/control-room/technical-architecture-and-security/version-control). This readme describes how you would set up your variables within GitHub to automatically utilize the correct action and workspace within Control Room.
 
+> **NOTE** Action files are stored in [`.github/workflows`](./.github/workflows) as required by GitHub.
+
 This readme assumes the following:
 
 * A Robocorp Control Room Organization exists with three different workspaces with the following names:
@@ -9,40 +11,41 @@ This readme assumes the following:
     * `Test`: which we will link with the `test` branch
     * `Dev`: which we will link with the `dev` branch
 * An Ubuntu-based runner exists within your GitHub instance which can execute the script
-
-## Creating Environments
-
-TODO: Finishe readme, currently copy from GitLab below
-TODO: Get action files
+* A GitHub account and repository for your robot that has three different protected branches with the following names:
+    * `main`
+    * `test`
+    * `dev`
 
 ## Creating environments
 
-Before you can configure pipelines to use different variables for each branch, you must first create corresponding environments. You do this within your GitLab repository by navigating to the `Operate` > `Environments` menu, then clicking the `add` button. 
+Before you can configure actions to use different variables for each branch, you must first create corresponding environments. You do this within your GitHub repository by navigating to the `Settings` > `Environments` menu, then clicking the `New environment` button. 
 
-![Creating environments in GitLab](./img/gitlab_create_environments_1.png)
+![Creating environments in GitHub](./img/github_create_new_environment_1.png)
 
-You must specificy a name before saving. In our example, we chose `dev`, `test`, and `production`.
+You must specificy a name before saving. In our example, we chose `dev`, `test`, and `production`. Once you've entered a name, you can click `Configure Environment` to configure settings and set variables.
 
-![Creating a new environment in GitLab](./img/gitlab_create_environments_2.png)
+![Configuring a new environment in GitHub](./img/github_create_new_environment_2.png)
+
+When configuring the environment, you should configure the `Deployment branches` so that each environment is only deploying one specific branch, e.g., the `main` branch will deploy to the `production` environment. You should also create the environment variables `ROBOT_ID` and `WORKSPACE_ID` while you are on this screen by clicking `Add variable`.
+
+> **NOTE** You can also set variables separately as described below.
 
 ## Saving API keys and other variables
 
-Once you have your three environments, you can create variables for each as well as provide variables for the secret API token needed by the pipeline if you are deploying from it.
+Once you have your three environments, you can create variables for each as well as provide variables for the secret access credential token needed by the action if you are deploying from it.
 
-> **IMPORTANT** Be sure to make the API token a `masked` variable!
+> **IMPORTANT** Be sure to make the access credential token a `secret`!
 
-Variables can be created from the `Settings` > `CI/CD` menu. Search through the various sections of the `CI/CD Settings` menu to find the `Variables` section, where you can add the variables.
+Variables can be created from the `Settings` > `Secrets and variables` > `actions` menu. This menu provides for a tab to create `Secrets` and a tab to create `Variables`. If you created variables when creating your environments, you will see them in the `Variables` tab. You must add the secrets and variables as defined in the [action](../../.github/workflows/robocorp-deploy.yml) file.
 
-![Finding the variables settings](./img/gitlab_variables_settings.png)
+![Adding a secret](./img/github_create_repository_secret.png)
 
-You must add the variables as defined in the [pipeline](robocorp-ci-template.gitlab-ci.yml) file.
+Secrets will remain masked in logging.
 
-![Adding a variable](./img/gitlab_add_variable_dialog.png)
+![Adding a variable](./img/github_create_repository_variable.png)
 
-Since you are creating different variables for each environment, you must create the same variable multiple times, setting it to be related to specific environments.
-
-![Adding extra variables](./img/gitlab_add_diff_env_variable.png)
+The only repository level secret needed in the `CR_ENDPOINT_URL`. You will have configured the other variables when creating your environments.
 
 ## Try running it!
 
-Now you can try to run your new pipeline from the `Build` > `Pipeline` menu! You can also trigger the pipeline by creating a merge request targeting any of the three protected branches.
+Now you can try to run your new pipeline from the `Actions` menu! You can also trigger the pipeline by creating a merge request targeting any of the three protected branches.
