@@ -16,6 +16,16 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
+      - uses: actions/checkout@v3
+
+      - name: Restore cache
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ~/.robocorp
+            /user/local/bin/rcc
+          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/robot.yaml', '**/conda.yaml') }}
+
       - name: Deploy to Robocorp Control Room
         run: |
           rcc cloud push --robot ${{ vars.ROBOT_ID }} \
