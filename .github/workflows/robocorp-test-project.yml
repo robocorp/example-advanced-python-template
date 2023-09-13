@@ -10,7 +10,7 @@ on:
 
 jobs:
   call-install-dependencies:
-    uses: ./robocorp-install-dependencies.yml
+    uses: ./.github/workflows/robocorp-install-dependencies.yml
   test:
     runs-on: ubuntu-latest
     steps:
