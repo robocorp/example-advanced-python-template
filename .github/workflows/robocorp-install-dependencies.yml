@@ -2,9 +2,6 @@ name: Install Dependencies
 
 on:
   workflow_call:
-
-env:
-  ROBOCORP_HOME: ${{ github.workspace }}/.robocorp
     
 jobs:
   install_dependencies:
@@ -17,9 +14,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ${{ github.workspace }}/.robocorp
+            ~/.robocorp
             /user/local/bin/rcc
-          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/robot.yaml, **/conda.yaml') }}
+          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/robot.yaml', '**/conda.yaml') }}
           restore-keys: |
             ${{ runner.os }}-dependencies-
 
