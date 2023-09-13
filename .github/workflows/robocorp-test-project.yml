@@ -9,11 +9,22 @@ on:
   workflow_call:
 
 jobs:
-  call-install-dependencies:
-    uses: ./robocorp-install-dependencies.yml
+  call-robocorp-install-dependencies:
+    uses: ./.github/workflows/robocorp-install-dependencies.yml
   test:
+    needs: call-robocorp-install-dependencies
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
+      - name: Restore cache
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            ~/.robocorp
+            /usr/local/bin/rcc
+          key: ${{ runner.os }}-dependencies-${{ hashFiles('**/robot.yaml', '**/conda.yaml') }}
+
       - name: Run tests
         run: |
           rcc run -t "UNIT TESTS"
