@@ -32,4 +32,5 @@ jobs:
     uses: ./.github/workflows/robocorp-deploy.yml
     with:
       environment: production 
+      secrets: inherit
 
