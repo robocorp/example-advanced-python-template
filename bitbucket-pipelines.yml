@@ -64,11 +64,11 @@ pipelines:
     test:
       - step:
           <<: *deploy
-          deployment: Staging
+          deployment: Test
     dev:
       - step:
           <<: *deploy
-          deployment: Test
+          deployment: Dev
 
   pull-requests:
     main:
