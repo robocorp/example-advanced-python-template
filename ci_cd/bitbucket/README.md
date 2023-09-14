@@ -9,7 +9,34 @@ This readme assumes the following:
     * `Test`: which we will link with the `test` branch
     * `Dev`: which we will link with the `dev` branch
 * An Ubuntu-based runner exists within your Bitbucket instance which can execute the script
+* A BitBucket repository with the following branches, all set to be protected:
+    * `main`
+    * `test`
+    * `dev`
+* Pipelines are enabled for your repository
 
-## Creating Environments
+## Creating environments
 
-TODO: Finishe readme
+Before you can configure pipelines to use different variables for each branch, you must first create corresponding deployments. You do this within your BitBucket repository by navigating to the `Repository settings` > `Deployments` menu. BitBucket populates this section automatically with three Deployments called `Test`, `Staging`, and `Production`. You can rename them easily to match your desired names.
+
+![Renaming BitBucket Deployments](./img/bitbucket_deployment_configuration.png)
+
+> **NOTE** If you are on a premium plan, you can also configure the deployment to only allow deployment from your mapped branch, e.g., the `dev` branch should deploy via the `Dev` deployment.
+
+While you are here, you can also configure your deployment-specific variables, like `ROBOT_ID` and `WORKSPACE_ID`, neither of which need to be secured.
+
+## Saving API keys and other variables
+
+Once you have your three deployments, you can create variables for the access credential needed by the pipeline so you can deploy from it.
+
+> **IMPORTANT** Be sure to make the access credential token is a `secured` variable!
+
+Variables can be created from the `Repository settings` > `Repository variables` menu. Search through the various sections of the `CI/CD Settings` menu to find the `Variables` section, where you can add the variables.
+
+![Creating variables](./img/bitbucket_creating_variable.png)
+
+You must add the variables as defined in the [pipeline](../../bitbucket-pipelines.yml) file (which is located in the root of the robot file due to limitations of BitBucket).
+
+## Try running it!
+
+Now you can try to run your new pipeline from the `Build` > `Pipeline` menu! You can also trigger the pipeline by creating a merge request targeting any of the three protected branches.
