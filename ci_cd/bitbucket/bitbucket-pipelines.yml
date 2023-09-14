@@ -16,18 +16,37 @@
 # For more information on creating/getting these values in control room, check out https://robocorp.com/docs/rcc/workflow
 
 definitions:
+  caches:
+    robocorp-cache:
+      key:
+        files:
+          - robot.yaml
+          - conda.yaml
+      path: ~/.robocorp
+
+  script:
+    &installRcc curl -o rcc https://downloads.robocorp.com/rcc/releases/latest/linux64/rcc &&
+    chmod a+x rcc &&
+    mv rcc /usr/local/bin/
+
   steps:
     - step: &deploy
         name: Deploy to Control Room
         script:
-          - curl -o rcc https://downloads.robocorp.com/rcc/releases/latest/linux64/rcc
-          - chmod a+x rcc
-          - mv rcc /usr/local/bin/
+          - *installRcc
           - >
             rcc cloud push 
             -r $ROBOT_ID 
             -w $WORKSPACE_ID 
             --account $CR_ACCESS_CREDENTIALS:$CR_ENDPOINT_URL
+
+    - step: &test
+        name: Run Unit Tests
+        script:
+          - *installRcc
+          - rcc run -t "UNIT TESTS"
+        caches:
+          - robocorp-cache
 
 image: atlassian/default-image:latest
 
@@ -37,13 +56,19 @@ pipelines:
       - step:
           <<: *deploy
           deployment: Production
-
     test:
       - step:
           <<: *deploy
           deployment: Staging
-
     dev:
       - step:
           <<: *deploy
           deployment: Test
+
+  pull-requests:
+    main:
+      - step: *test
+    test:
+      - step: *test
+    dev:
+      - step: *test
