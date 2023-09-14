@@ -31,7 +31,7 @@ definitions:
   script:
     &installRcc curl -o rcc https://downloads.robocorp.com/rcc/releases/latest/linux64/rcc &&
     chmod a+x rcc &&
-    mv rcc /usr/local/bin/ %%
+    mv rcc /usr/local/bin/ &&
     echo "RCC installed"
 
   steps:
