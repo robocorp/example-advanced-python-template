@@ -39,4 +39,4 @@ You must add the variables as defined in the [pipeline](../../bitbucket-pipeline
 
 ## Try running it!
 
-Now you can try to run your new pipeline from the `Build` > `Pipeline` menu! You can also trigger the pipeline by creating a merge request targeting any of the three protected branches.
+Now you can try to run your new pipeline from the `Pipelines` menu! You can also trigger the pipeline by creating a merge request targeting any of the three protected branches.
