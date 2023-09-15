@@ -48,8 +48,8 @@ variables:
   - group: $(Build.SourceBranchName)
 
 jobs:
-  - template: python-unit-tests.yml
-  - template: control-room-deploy.yml
+  - template: ci_cd/azure_devops/python-unit-tests.yml
+  - template: ci_cd/azure_devops/control-room-deploy.yml
     parameters:
       robot_id: $(ROBOT_ID)
       workspace_id: $(WORKSPACE_ID)
