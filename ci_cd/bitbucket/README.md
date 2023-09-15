@@ -1,6 +1,8 @@
 # Bitbucket Pipeline for Python-based Automations
 
-This section of the example explains how to setup a Bitbucket pipeline which will run your unit tests when Pull Requests are opened against the `main`, `test`, and `dev` branches. There is also a pipeline file which can deploy to Control Room. This readme describes how you would set up your environments within Bitbucket to automatically utilize the correct pipeline and workspace within Control Room.
+This section of the example explains how to setup a Bitbucket pipeline which will run your unit tests when Pull Requests are opened in the BitBucket repository. There is also a pipeline file which can deploy to Control Room. This readme describes how you would set up your environments within Bitbucket to automatically utilize the correct pipeline and workspace within Control Room.
+
+> **NOTE** BitBucket `pull-request` pipelines are based on the *source* branch name instead of the destination, so you must define a pattern that matches against incoming branch names. These can be standardized through other branch settings, but for the sake of this example, we used the catch-all pattern of `'**'`.
 
 This readme assumes the following:
 
