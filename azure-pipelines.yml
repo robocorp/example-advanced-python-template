@@ -1,0 +1,57 @@
+# Python Automation testing and deploy example
+
+# This template allows you to push your robot from your Azure DevOps repository to your configured
+# Control Room. This configuration will run an automation's unit tests via `rcc` as part of
+# any pull request and deploy the project upon merge/commit to the Control Room depending
+# on the configured environment.
+
+# Prerequisites:
+# You must configure the following variables within your Azure DevOps project settings:
+# * $CR_ACCESS_CREDENTIALS: This is the access token for your Control Room account and can be set
+#   per environment or globally within your project.
+# * $CR_ENDPOINT_URL: This is the API endpoint per the Control Room API helper for uploading a robot.
+# * $ROBOT_ID: This is the ID of the robot within the Control Room Robot UI. You should set this for
+#   each environment you have configured.
+# * $WORKSPACE_ID: This is the workspace ID associated with the environment. You should set this for
+#   each environment you have configured.
+# The ROBOT_ID and WORKSPACE_ID should be configured at the deployment level so each pipeline deploys
+# to the correct Workspace environment.
+#
+# The robot in control room must be configured as a `robot file` type of robot.
+# For more information on creating/getting these values in control room, check out https://robocorp.com/docs/rcc/workflow
+
+# Control Room deploy example
+
+# This pipeline will push the robot code to the various environments in control room.
+# It will push to the environment that matches the name of the branch configured in the trigger
+# of each job.  For example, if the trigger is set to `dev`, it will push to the `dev` environment.
+
+# Prerequisites:
+# You must configure the following variable groups with noted variables:
+# * <environment>-workspace-id (where <environment> matches the names of your workspaces)
+#   - WORKSPACE_ID
+#   - ROBOT_ID
+# * control-room-deploy-credentials
+#   - CR_ACCESS_CREDENTIALS
+#   - CR_ENDPOINT_URL
+
+# The robot in control room must be configured as a `robot file` type of robot.
+# For more information on creating/getting these values in control room, check out https://robocorp.com/docs/rcc/workflow
+
+trigger:
+  - dev
+  - test
+  - main
+
+variables:
+  - group: control-room-credentials
+  - group: $(Build.SourceBranchName)
+
+jobs:
+  - template: python-unit-tests.yml
+  - template: control-room-deploy.yml
+    parameters:
+      robot_id: $(ROBOT_ID)
+      workspace_id: $(WORKSPACE_ID)
+      cr_access_credentials: $(CR_ACCESS_CREDENTIALS)
+      cr_endpoint_url: $(CR_ENDPOINT_URL)

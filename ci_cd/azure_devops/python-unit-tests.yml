@@ -1,0 +1,26 @@
+# This template will run Pythong Unit tests when triggered
+# by a pull request.
+
+parameters:
+  - name: task_name
+    type: string
+    default: UNIT TESTS
+
+jobs:
+  - job: UnitTests
+    displayName: "Run Python Automation Unit Tests"
+    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+    pool:
+      vmImage: mcr.microsoft.com/playwright:v1.36.0
+    steps:
+      - task: Cache@2
+        inputs:
+          key: 'rcc | "$(Agent.OS)" | robot.yaml | conda.yaml'
+          restoreKeys: |
+            rcc | "$(Agent.OS)"
+            rcc
+          path: ~/.robocorp
+      - checkout: self
+      - template: install-rcc.yml
+      - script: rcc run -t "${{ parameters.task_name }}"
+        displayName: "Run ${{ parameters.task_name }}"

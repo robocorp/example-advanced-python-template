@@ -1,0 +1,6 @@
+# Template provides a step to install RCC
+steps:
+  - script: curl -o rcc https://downloads.robocorp.com/rcc/releases/latest/linux64/rcc
+  - script: chmod a+x rcc
+  - script: mv rcc /usr/local/bin/
+  - script: echo "RCC installed"
