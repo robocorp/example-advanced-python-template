@@ -77,3 +77,9 @@ pipelines:
       - step: *test
     dev:
       - step: *test
+    # Due to how BitBucket pull-request pipelines work, you must specifiy a source branch for
+    # the pull-request pipeline to run. This is why we have the "**" branch here. You should
+    # change this to the branch or pattern you want to run the pull-request pipeline on. An
+    # example would be "feature/*" to run the pipeline on any branch that starts with "feature/".
+    "**":
+      - step: *test
