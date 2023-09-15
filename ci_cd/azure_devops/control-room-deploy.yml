@@ -3,6 +3,8 @@
 # Integration.
 
 parameters:
+  - name: variable_group_name
+    type: string
   - name: cr_access_credentials
     type: string
   - name: cr_endpoint_url
@@ -20,7 +22,7 @@ jobs:
       - checkout: self
       - template: install-rcc.yml
       - script: >
-          rcc cloud push --robot ${{ parameters.robot_id }}
-          --workspace ${{ parameters.workspace_id }}
+          rcc cloud push --robot $(ROBOT_ID)
+          --workspace $(WORKSPACE_ID)
           --account ${{ parameters.cr_access_credentials }}:${{ parameters.cr_endpoint_url }}
         displayName: "Push to Control Room"
