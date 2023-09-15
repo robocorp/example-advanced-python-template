@@ -50,6 +50,6 @@ jobs:
   - template: ci_cd/azure_devops/python-unit-tests.yml
   - template: ci_cd/azure_devops/control-room-deploy.yml
     parameters:
-      variable_group_name: $(Build.SourceBranchName)
+      variable_group_name: ${{variables['Build.SourceBranchName']}}
       cr_access_credentials: $(CR_ACCESS_CREDENTIALS)
       cr_endpoint_url: $(CR_ENDPOINT_URL)
