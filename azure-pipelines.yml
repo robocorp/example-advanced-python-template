@@ -45,7 +45,7 @@ trigger:
 
 variables:
   - group: control-room-credentials
-  - group: $(Build.SourceBranchName)
+  - group: ${{variables['Build.SourceBranchName']}})
 
 jobs:
   - template: ci_cd/azure_devops/python-unit-tests.yml
