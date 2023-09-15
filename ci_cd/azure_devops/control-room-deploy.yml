@@ -3,10 +3,6 @@
 # Integration.
 
 parameters:
-  - name: robot_id
-    type: string
-  - name: workspace_id
-    type: string
   - name: cr_access_credentials
     type: string
   - name: cr_endpoint_url
@@ -18,6 +14,8 @@ jobs:
     condition: and(succeeded(), eq(variables['Build.Reason'], 'IndividualCI'))
     pool:
       vmImage: ubuntu-latest
+    variables:
+      - group: ${{ parameters.variable_group_name }}
     steps:
       - checkout: self
       - template: install-rcc.yml

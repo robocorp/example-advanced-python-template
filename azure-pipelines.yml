@@ -45,13 +45,11 @@ trigger:
 
 variables:
   - group: control-room-credentials
-  - group: ${{variables['Build.SourceBranchName']}})
 
 jobs:
   - template: ci_cd/azure_devops/python-unit-tests.yml
   - template: ci_cd/azure_devops/control-room-deploy.yml
     parameters:
-      robot_id: $(ROBOT_ID)
-      workspace_id: $(WORKSPACE_ID)
+      variable_group_name: $[Build.SourceBranchName]
       cr_access_credentials: $(CR_ACCESS_CREDENTIALS)
       cr_endpoint_url: $(CR_ENDPOINT_URL)
