@@ -53,7 +53,7 @@ definitions:
         caches:
           - robocorp-cache
 
-image: atlassian/default-image:latest
+image: mcr.microsoft.com/playwright:v1.36.0
 
 pipelines:
   branches:
