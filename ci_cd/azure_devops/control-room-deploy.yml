@@ -13,7 +13,11 @@ parameters:
 jobs:
   - job: DeployToControlRoom
     displayName: "Deploy to Control Room"
-    condition: and(succeeded(), eq(variables['Build.Reason'], 'IndividualCI'))
+    condition: >
+      and(succeeded(),
+      or(eq(variables['Build.Reason'], 'IndividualCI'),
+      eq(variables['Build.Reason'], 'Manual'),
+      eq(variables['Build.Reason'], 'BatchedCI')))
     pool:
       vmImage: ubuntu-latest
     variables:
