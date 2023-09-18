@@ -59,15 +59,15 @@ The reporter step should be configured in the Control Room with the setting `Sta
 - Loop through all Work Items in the queue, collecting key metrics from each.
 - Create a final result output work item.
 
-Final output work items can be used several ways within the Control Room, but primarily, they are useful as payloads in webhooks configured to be sent back to triggering systems at the end of 
+Final output work items can be used several ways within the Control Room, but primarily, they are useful as payloads in webhooks configured to be sent back to triggering systems at the end of the full process run.
 
 ## Local testing
 
 For best experience to test the work items in this example we recommend using [our VS Code extensions](https://robocorp.com/docs/developer-tools/visual-studio-code). With the Robocorp Code extension you can simply run and [select the input work items](https://robocorp.com/docs/developer-tools/visual-studio-code/extension-features#using-work-items) to use, create inputs to simulate error cases, and so on.
 
-Additionally, the Automation Classes are optimized to be tested via Pytest using the VS Code test extension, you can read more about how that works [here](https://code.visualstudio.com/docs/python/testing).
+Additionally, the Automation Classes are optimized to be tested via Pytest using the VS Code test extension, you can read more about how that works [here](https://code.visualstudio.com/docs/python/testing). The unit tests in this example are specifically defined in the `tests` directory and are configured via a root `pytest.ini` file and `conftest.py` files within the test directories. Together, they allow the `Swaglabs` class unit tests to operate. These unit tests are tagged so that those that perform operations on the test website online at `www.saucedemo.com` are marked as `live`. 
 
-TODO: Perhaps discuss the pytest.ini and related setup here?
+> **NOTE** These tests use the same environment built by the Robocorp Code extension as used by the robot tasks.
 
 ## CI/CD Pipelines
 
