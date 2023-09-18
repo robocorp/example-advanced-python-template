@@ -49,3 +49,5 @@ The only repository level secret needed in the `CR_ENDPOINT_URL`. You will have 
 ## Try running it!
 
 Now you can try to run your new pipeline from the `Actions` menu! You can also trigger the pipeline by creating a merge request targeting any of the three protected branches.
+
+Example runs for these GitHub actions are part of this very repo!

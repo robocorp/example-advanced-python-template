@@ -45,3 +45,5 @@ Since you are creating different variables for each environment, you must create
 ## Try running it!
 
 Now you can try to run your new pipeline from the `Build` > `Pipeline` menu! You can also trigger the pipeline by creating a merge request targeting any of the three protected branches.
+
+For an example GitLab project where this is all set up, checkout our [example](https://gitlab.com/robocorp/example-python-automation)
