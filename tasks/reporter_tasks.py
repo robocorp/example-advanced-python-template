@@ -8,11 +8,9 @@ from robocorp.tasks import task
 
 from . import ARTIFACTS_DIR, DEVDATA, _setup_log
 
-# TODO: Get an update from Fabio becuase imports aren't working.
-
 
 @task
-def reporter():  # TODO: test this task
+def reporter():
     _setup_log()
     log.info("Reporter task started.")
 
