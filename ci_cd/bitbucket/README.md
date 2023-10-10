@@ -42,3 +42,9 @@ You must add the variables as defined in the [pipeline](../../bitbucket-pipeline
 ## Try running it!
 
 Now you can try to run your new pipeline from the `Pipelines` menu! You can also trigger the pipeline by creating a merge request targeting any of the three protected branches.
+
+# Alternate Credentials
+
+If you would prefer to use an API Key obtained from the Control Room Integrations menu, you should replace the `bitbucket-pipelines.yml` file with the [API-based pipeline file](./bitbucket-pipelines_api-key.yml) and rename it to match the existing file. This alternate file will utilize the API key instead of Access Credentials, which allows you to more restrict the access the key has compared to access credentials.
+
+> **NOTE** You must create a different variable for this script called `CR_API_KEY`.

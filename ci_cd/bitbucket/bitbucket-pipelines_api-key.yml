@@ -1,0 +1,100 @@
+# Python Automation testing and deploy example
+
+# This template allows you to push your robot from your BitBucket repository to your configured
+# Control Room. This configuration will run an automation's unit tests via `rcc` as part of
+# any pull request and deploy the project upon merge/commit to the Control Room depending
+# on the configured deployments. This configuration does not use Access Credentials and instead
+# uses an API key for authentication to the Task Packages API.
+
+# Prerequisites:
+# You must configure the following variables within your BitBucket repository settings:
+# * $CR_API_KEY: This is the API key for your Control Room account and can be set
+#   per deployment or globally within your repository. It must have the following permissions:
+#   * Tasks: read_task_packages, write_task_packages
+# * $CR_ENDPOINT_URL: This is the API endpoint per the Control Room API helper for uploading a robot.
+# * $ROBOT_ID: This is the ID of the robot within the Control Room Robot UI. You should set this for
+#   each deployment you have configured.
+# * $WORKSPACE_ID: This is the workspace ID associated with the deployment. You should set this for
+#   each deployment you have configured.
+# The ROBOT_ID and WORKSPACE_ID should be configured at the deployment level so each pipeline deploys
+# to the correct Workspace.
+#
+# The robot in control room must be configured as a `robot file` type of robot.
+# For more information on creating/getting these values in control room, check out https://robocorp.com/docs/rcc/workflow
+definitions:
+  caches:
+    robocorp-cache:
+      key:
+        files:
+          - robot.yaml
+          - conda.yaml
+      path: ~/.robocorp
+
+  script:
+    - &installJq apt-get update && apt-get install -y jq
+    - &installRcc curl -o rcc https://downloads.robocorp.com/rcc/releases/latest/linux64/rcc &&
+      chmod a+x rcc &&
+      mv rcc /usr/local/bin/ &&
+      echo "RCC installed"
+
+  steps:
+    - step: &deploy
+        name: Deploy to Control Room
+        script:
+          - *installJq
+          - *installRcc
+          - rcc robot wrap
+          - >
+            upload_link=$(curl --request GET "$CR_ENDPOINT_URL/robot-v2/workspaces/$WORKSPACE_ID/robots/$ROBOT_ID/file/uploadlink"
+            --header "Authorization: RC-WSKEY $CR_API_KEY")
+          - >
+            curl
+            -F "bucket=$(echo $upload_link | jq -r '.fields.bucket')"
+            -F "key=$(echo $upload_link | jq -r '.fields.key')"
+            -F "Policy=$(echo $upload_link | jq -r '.Policy')"
+            -F "X-Amz-Algorithm=$(echo $upload_link | jq -r '.fields.X-Amz-Algorithm')"
+            -F "X-Amz-Credential=$(echo $upload_link | jq -r '.fields.X-Amz-Credential')"
+            -F "X-Amz-Date=$(echo $upload_link | jq -r '.fields.X-Amz-Date')"
+            -F "X-Amz-Security-Token=$(echo $upload_link | jq -r '.fields.X-Amz-Security-Token')"
+            -F "X-Amz-Signature=$(echo $upload_link | jq -r '.fields.X-Amz-Signature')"
+            -F "file=@robot.zip"
+            $(echo $upload_link | jq -r '.url')
+
+    - step: &test
+        name: Run Unit Tests
+        script:
+          - *installRcc
+          - rcc run -t "UNIT TESTS"
+        caches:
+          - robocorp-cache
+
+image: mcr.microsoft.com/playwright:v1.36.0
+
+pipelines:
+  branches:
+    main:
+      - step:
+          <<: *deploy
+          deployment: Production
+    test:
+      - step:
+          <<: *deploy
+          deployment: Test
+    dev:
+      - step:
+          <<: *deploy
+          deployment: Dev
+
+  pull-requests:
+    main:
+      - step: *test
+    test:
+      - step: *test
+    dev:
+      - step: *test
+    # Due to how BitBucket pull-request pipelines work, you must specifiy a source branch for
+    # the pull-request pipeline to run. This is why we have the "**" branch here. You should
+    # change this to the branch or pattern you want to run the pull-request pipeline on. An
+    # example would be "feature/*" to run the pipeline on any branch that starts with "feature/".
+    "**":
+      - step: *test
