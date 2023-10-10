@@ -52,11 +52,11 @@ definitions:
             -F "bucket=$(echo $upload_link | jq -r '.fields.bucket')"
             -F "key=$(echo $upload_link | jq -r '.fields.key')"
             -F "Policy=$(echo $upload_link | jq -r '.Policy')"
-            -F "X-Amz-Algorithm=$(echo $upload_link | jq -r '.fields.X-Amz-Algorithm')"
-            -F "X-Amz-Credential=$(echo $upload_link | jq -r '.fields.X-Amz-Credential')"
-            -F "X-Amz-Date=$(echo $upload_link | jq -r '.fields.X-Amz-Date')"
-            -F "X-Amz-Security-Token=$(echo $upload_link | jq -r '.fields.X-Amz-Security-Token')"
-            -F "X-Amz-Signature=$(echo $upload_link | jq -r '.fields.X-Amz-Signature')"
+            -F "X-Amz-Algorithm=$(echo $upload_link | jq -r '.fields.\"X-Amz-Algorithm\"')"
+            -F "X-Amz-Credential=$(echo $upload_link | jq -r '.fields.\"X-Amz-Credential\"')"
+            -F "X-Amz-Date=$(echo $upload_link | jq -r '.fields.\"X-Amz-Date\"')"
+            -F "X-Amz-Security-Token=$(echo $upload_link | jq -r '.fields.\"X-Amz-Security-Token\"')"
+            -F "X-Amz-Signature=$(echo $upload_link | jq -r '.fields.\"X-Amz-Signature\"')"
             -F "file=@robot.zip"
             $(echo $upload_link | jq -r '.url')
 
