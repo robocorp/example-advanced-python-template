@@ -17,14 +17,11 @@ from typing import Mapping, Optional, Any
 from prodict import Prodict
 
 from playwright.sync_api import (
-    Browser as PlaywrightBrowser,
-    BrowserContext,
-    Page,
     Locator,
     TimeoutError,
 )
 
-from robocorp import browser, log
+from robocorp import log
 
 from . import WebAutomationBase, WebApplicationError, WebBusinessError
 
@@ -73,11 +70,10 @@ class Swaglabs(WebAutomationBase):
         username: Optional[str] = None,
         password: Optional[str] = None,
         base_url: str = DEFAULT_URL,  # Note the new default value
-        timeout: float = 10000.0,
+        timeout: Optional[float] = None,
         browser_configuration: Optional[Mapping[str, Any]] = None,
         context_configuration: Optional[Mapping[str, Any]] = None,
     ):
-        self.base_url = base_url
         super().__init__(
             username,
             password,
@@ -92,7 +88,7 @@ class Swaglabs(WebAutomationBase):
         username: Optional[str] = None,
         password: Optional[str] = None,
         base_url: Optional[str] = None,
-        timeout: float = 10000.0,
+        timeout: Optional[float] = None,
         browser_configuration: Optional[Mapping[str, Any]] = None,
         context_configuration: Optional[Mapping[str, Any]] = None,
     ) -> None:
@@ -173,8 +169,8 @@ class Swaglabs(WebAutomationBase):
             bool: True if the user is logged in, False otherwise.
         """
         if (
-            self._page is not None
-            and self.base_url in self._page.url
+            self.base_url is not None
+            and self.base_url in self.page.url
             and self.locators.cart_button.is_visible()
         ):
             return True
