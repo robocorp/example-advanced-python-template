@@ -13,7 +13,7 @@ import os
 import pytest
 from typing import Generator, Union
 
-from robocorp import browser, vault
+from robocorp import vault
 
 # System under test
 from libs.web.swaglabs import (

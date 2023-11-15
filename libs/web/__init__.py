@@ -15,8 +15,6 @@ from playwright.sync_api import (
     Browser as PlaywrightBrowser,
     BrowserContext,
     Page,
-    Locator,
-    TimeoutError,
 )
 
 from robocorp import browser, log
@@ -43,7 +41,7 @@ class WebAutomationBase(ABC):
         username: Optional[str] = None,
         password: Optional[str] = None,
         base_url: Optional[str] = None,
-        timeout: float = 10000.0,
+        timeout: Optional[float] = None,
         browser_configuration: Optional[Mapping[str, Any]] = None,
         context_configuration: Optional[Mapping[str, Any]] = None,
     ):
@@ -63,17 +61,26 @@ class WebAutomationBase(ABC):
             context_configuration: The context configuration to use for the
                 web automation.
         """
+        self._configured = False
         self.username = None
         self.password = None
         self.base_url = None
-        self.configure(
-            username,
-            password,
-            base_url,
-            timeout,
-            browser_configuration,
-            context_configuration,
-        )
+        if (
+            username is not None
+            or password is not None
+            or base_url is not None
+            or timeout is not None
+            or (browser_configuration is not None and len(browser_configuration) > 0)
+            or (context_configuration is not None and len(context_configuration) > 0)
+        ):
+            self.configure(
+                username,
+                password,
+                base_url,
+                timeout,
+                browser_configuration,
+                context_configuration,
+            )
 
     @abstractmethod
     def configure(
@@ -81,7 +88,7 @@ class WebAutomationBase(ABC):
         username: Optional[str] = None,
         password: Optional[str] = None,
         base_url: Optional[str] = None,
-        timeout: float = 10000.0,
+        timeout: Optional[float] = None,
         browser_configuration: Optional[Mapping[str, Any]] = None,
         context_configuration: Optional[Mapping[str, Any]] = None,
     ) -> None:
@@ -106,6 +113,8 @@ class WebAutomationBase(ABC):
             context_configuration (mapping): The context configuration to use for the
                 web automation.
         """
+        if timeout is None:
+            timeout = 10000.0
         if isinstance(username, str):
             self.username = username
         elif username is not None:
@@ -122,10 +131,8 @@ class WebAutomationBase(ABC):
             browser.configure(**browser_configuration)
         if context_configuration is not None:
             browser.configure_context(**context_configuration)
-        self._browser = browser.browser()
-        self._context = browser.context()
-        self._context.set_default_timeout(timeout)
-        self._page = browser.page()
+        browser.context().set_default_timeout(timeout)
+        self._configured = True
 
     @property
     def browser(self) -> PlaywrightBrowser:
@@ -133,9 +140,9 @@ class WebAutomationBase(ABC):
         the automation will cause the automation to be configured
         with the default configuration.
         """
-        if self._browser is None:
+        if self._configured == False:
             self.configure()
-        return self._browser
+        return browser.browser()
 
     @property
     def context(self) -> BrowserContext:
@@ -143,9 +150,9 @@ class WebAutomationBase(ABC):
         the automation will cause the automation to be configured
         with the default configuration.
         """
-        if self._context is None:
+        if self._configured == False:
             self.configure()
-        return self._context
+        return browser.context()
 
     @property
     def page(self) -> Page:
@@ -153,9 +160,9 @@ class WebAutomationBase(ABC):
         the automation will cause the automation to be configured
         with the default configuration.
         """
-        if self._page is None:
+        if self._configured == False:
             self.configure()
-        return self._page
+        return browser.page()
 
     class Locators(Prodict):
         """A class which defines the locators for the web automation.
@@ -235,8 +242,8 @@ class WebAutomationBase(ABC):
         log.info("Closing browser.")
         if self.is_logged_in():
             self.logout()
-        if self._page is not None:
-            self._page.close()
+        if self._configured == True:
+            self.page.close()
 
     def __enter__(self) -> Self:
         """Enter the context manager. This will create a browser instance
