@@ -10,7 +10,7 @@ ROBOT_ROOT = Path(__file__).parent.parent
 DEVDATA = ROBOT_ROOT / "devdata"
 
 
-def _setup_log() -> None:
+def setup_log() -> None:
     """Tries to use the LOG_LEVEL text asset or environment variable
     to set the log level. If the value is not valid, the default is
     "info". The environment variable will override the asset value.
@@ -27,7 +27,7 @@ def _setup_log() -> None:
     log.setup_log(output_log_level=log_level)
 
 
-def _get_secret(system: str) -> vault.SecretContainer:
+def get_secret(system: str) -> vault.SecretContainer:
     """Gets the appropriate secret from the vault based on
     the system name and the mapping within the Control Room
     asset storage. This is a simple example of how you can
@@ -63,4 +63,4 @@ def _get_secret(system: str) -> vault.SecretContainer:
     return vault.get_secret(secret_name)
 
 
-__all__ = ["ARTIFACTS_DIR", "ROBOT_ROOT", "DEVDATA", "_setup_log", "_get_secret"]
+__all__ = ["ARTIFACTS_DIR", "ROBOT_ROOT", "DEVDATA", "setup_log", "get_secret"]

@@ -5,7 +5,7 @@ well as the robocorp.log facility to log additional information.
 from robocorp import log, workitems
 from robocorp.tasks import task
 
-from . import _setup_log, _get_secret
+from . import setup_log, get_secret
 
 from libs.web.swaglabs import Swaglabs
 
@@ -13,7 +13,7 @@ from libs.web.swaglabs import Swaglabs
 INPUT_FILE_NAME = "orders.csv"
 
 
-def _process_order(swaglabs: Swaglabs, work_item: workitems.Input) -> None:
+def process_order(swaglabs: Swaglabs, work_item: workitems.Input) -> None:
     """Processes an order (a single work item).
 
     Args:
@@ -53,14 +53,14 @@ def _process_order(swaglabs: Swaglabs, work_item: workitems.Input) -> None:
 
 @task
 def consumer():
-    _setup_log()
+    setup_log()
     log.info("Consumer task started.")
-    credentials = _get_secret("swaglabs")
+    credentials = get_secret("swaglabs")
     with Swaglabs(
         credentials["username"], credentials["password"], credentials["url"]
     ) as swaglabs:
         # This loop is the most important in the Consumer.
         for work_item in workitems.inputs:
             with work_item:
-                _process_order(swaglabs, work_item)
+                process_order(swaglabs, work_item)
             log.info(f"Work item was released with state '{work_item.state}'.")

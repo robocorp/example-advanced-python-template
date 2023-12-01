@@ -6,7 +6,7 @@ from datetime import datetime
 from robocorp import log, workitems
 from robocorp.tasks import task
 
-from . import ARTIFACTS_DIR, DEVDATA, _setup_log
+from . import ARTIFACTS_DIR, DEVDATA, setup_log
 
 
 @task
@@ -27,7 +27,7 @@ def reporter():
     Alternatively, you could save the results to a file or generate
     an email or other notification.
     """
-    _setup_log()
+    setup_log()
     log.info("Reporter task started.")
 
     # The final output work item should be created first, because
