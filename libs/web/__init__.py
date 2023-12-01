@@ -233,7 +233,7 @@ class WebAutomationBase(ABC):
         raise NotImplementedError()
 
     def close(self) -> None:
-        """Logs out and then closes the browser.
+        """Logs out and then closes the browser page.
 
         Note: the browser and the context are not closed as required
         by the robocorp-browser framework, see that package for
@@ -254,5 +254,6 @@ class WebAutomationBase(ABC):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
-        """Exit the context manager. This will close the browser instance."""
+        """Exit the context manager. This will close the page managed
+        by the browser library."""
         self.close()
