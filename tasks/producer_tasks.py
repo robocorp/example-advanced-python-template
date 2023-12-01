@@ -8,7 +8,7 @@ from robocorp import log, workitems, excel
 from robocorp.tasks import task
 from robocorp.excel import tables
 
-from . import ARTIFACTS_DIR, _setup_log
+from . import ARTIFACTS_DIR, setup_log
 
 
 INPUT_FILE_NAME = "orders.csv"
@@ -16,7 +16,7 @@ INPUT_FILE_NAME = "orders.csv"
 
 @task
 def producer():
-    _setup_log()
+    setup_log()
     log.info("Producer task started.")
 
     # Often times, a producer bot needs to go get work items from
