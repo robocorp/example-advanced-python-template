@@ -15,7 +15,7 @@ jobs:
     needs: call-robocorp-install-dependencies
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Restore cache
         uses: actions/cache/restore@v3

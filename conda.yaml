@@ -6,16 +6,14 @@ channels:
   - conda-forge
 
 dependencies:
-  - python=3.9.16 # https://pyreadiness.org/3.9
-
+  - python=3.12.13                  # https://pyreadiness.org/3.12
+  - uv=0.11.2                       # https://github.com/astral-sh/uv
   # DEV dependencies
-  - pytest=7.4.2
-  - python-dotenv=1.0.0
-
-  - pip=22.1.2 # https://pip.pypa.io/en/stable/news
+  - pytest=9.0.2                    # https://pypi.org/project/pytest
+  - python-dotenv=1.2.2             # https://pypi.org/project/python-dotenv
   - pip:
-      - robocorp==1.0.0 # https://pypi.org/project/robocorp
-      - robocorp-browser==2.1.0 # https://pypi.org/project/robocorp-browser
-      - robocorp-log-pytest==0.0.1 # https://pypi.org/project/robocorp-log-pytest
-      - robocorp-excel==0.4.0 # https://pypi.org/project/robocorp-excel
-      - prodict==0.8.18 # https://pypi.org/project/prodict
+      - robocorp==3.1.1             # https://pypi.org/project/robocorp
+      - robocorp-browser==2.4.0     # https://pypi.org/project/robocorp-browser
+      - robocorp-log-pytest==0.0.5  # https://pypi.org/project/robocorp-log-pytest
+      - robocorp-excel==0.5.0       # https://pypi.org/project/robocorp-excel
+      - prodict==0.8.22             # https://pypi.org/project/prodict
